@@ -13,6 +13,8 @@ import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import android.content.Intent
+import android.widget.Toast
+import com.google.firebase.firestore.Query
 
 
 class MainActivity : AppCompatActivity() {
@@ -49,32 +51,32 @@ class MainActivity : AppCompatActivity() {
 
         adminButton = findViewById(R.id.adminButton)
         adminButton.setOnClickListener {
-            val intent = Intent(this, AdminActivity::class.java)
-            startActivity(intent)
+            isAdminUser { isAdmin ->
+                if (isAdmin) {
+                val intent = Intent(this, AdminActivity::class.java)
+                startActivity(intent)
+                adminButton.visibility = View.VISIBLE // Beispiel: Sichtbarkeit eines Admin-Buttons ändern
+
+            } else {
+                // Hier können Sie eine Nachricht anzeigen oder andere Maßnahmen ergreifen,
+                // wenn der Benutzer kein Administrator ist
+                Toast.makeText(this, "You are not authorized as an admin", Toast.LENGTH_SHORT).show()
+                adminButton.visibility = View.GONE // Beispiel: Admin-Button ausblenden
+
+            }}
     }
     }
 
     private fun checkIn() {
         val user = mAuth.currentUser
-        user?.let {
-            val timeEntry = hashMapOf(
-                "userId" to it.uid,
-                "checkIn" to System.currentTimeMillis()
-            )
-
-            try {
-                db.collection("timeEntries").add(timeEntry)
-                    .addOnSuccessListener {
-                        statusTextView.text = "Checked In"
-                    }
-                    .addOnFailureListener { exception ->
-                        statusTextView.text = "Check In failed: ${exception.message}"
-                    }
-            } catch (e: Exception) {
-                statusTextView.text = "Check In failed: ${e.message}"
-            }
+        user?.let { currentUser ->
+            val checkInTime = System.currentTimeMillis()
+    
+            // Speichern des Eintrags in Firestore
+            saveTimeEntry(currentUser.uid, checkInTime, null)
         } ?: run {
-            statusTextView.text = "User not signed in"
+            // Benutzer ist nicht angemeldet
+            statusTextView.text = "Benutzer ist nicht angemeldet"
         }
     }
 
@@ -85,7 +87,7 @@ class MainActivity : AppCompatActivity() {
                 "userId" to it.uid,
                 "checkOut" to System.currentTimeMillis()
             )
-
+    
             try {
                 db.collection("timeEntries").add(timeEntry)
                     .addOnSuccessListener {
@@ -101,7 +103,7 @@ class MainActivity : AppCompatActivity() {
             statusTextView.text = "User not signed in"
         }
     }
-
+    
     private fun viewTimes() {
         if (timesVisible) {
             // Zeiten ausblenden
@@ -179,5 +181,76 @@ class MainActivity : AppCompatActivity() {
         val intent = Intent(this, LoginActivity::class.java)
         startActivity(intent)
         finish()
-    }   
+    }
+    
+    private fun isAdminUser(callback: (Boolean) -> Unit) {
+        val user = mAuth.currentUser
+    
+        user?.let {
+            db.collection("users").document(it.uid)
+                .get()
+                .addOnSuccessListener { document ->
+                    if (document.exists()) {
+                        val role = document.getString("role")
+                        if (role == "admin") {
+                            // Der Benutzer ist ein Administrator
+                            callback(true)
+                        } else {
+                            // Standardmäßig kein Administrator
+                            callback(false)
+                        }
+                    } else {
+                        // Dokument existiert nicht
+                        callback(false)
+                    }
+                }
+                .addOnFailureListener { exception ->
+                    // Fehler bei der Überprüfung der Berechtigung
+                    callback(false)
+                }
+        } ?: run {
+            // Benutzer ist nicht angemeldet
+            callback(false)
+        }
+    }
+    
+    
+    private fun saveTimeEntry(userId: String, checkInTime: Long, checkOutTime: Long?) {
+        val timeEntry = hashMapOf(
+            "userId" to userId,
+            "checkIn" to checkInTime,
+            "checkOut" to checkOutTime
+        )
+    
+        try {
+            db.collection("timeEntries").add(timeEntry)
+                .addOnSuccessListener { documentReference ->
+                    statusTextView.text = "Erfolgreich eingecheckt"
+                }
+                .addOnFailureListener { e ->
+                    statusTextView.text = "Einchecken fehlgeschlagen: ${e.message}"
+                }
+        } catch (e: Exception) {
+            statusTextView.text = "Einchecken fehlgeschlagen: ${e.message}"
+        }
+    }
+
+    private fun getTimeEntriesForUser(userId: String) {
+        db.collection("timeEntries")
+            .whereEqualTo("userId", userId)
+            .get()
+            .addOnSuccessListener { documents ->
+                for (document in documents) {
+                    val checkInTime = document.getLong("checkIn")
+                    val checkOutTime = document.getLong("checkOut")
+                    // Verarbeiten Sie die abgerufenen Zeiteinträge hier
+                }
+            }
+            .addOnFailureListener { exception ->
+                // Fehler beim Abrufen der Zeiteinträge
+            }
+    }
+    
+    
+       
 }
