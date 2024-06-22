@@ -16,6 +16,12 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Check Out" />
+ <Button
+        android:id="@+id/adminButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Admin Panel" />
+
 
     <TextView
         android:id="@+id/statusTextView"
@@ -34,6 +40,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Logout" />
+
 
     <ScrollView
         android:layout_width="match_parent"

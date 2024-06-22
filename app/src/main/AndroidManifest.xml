@@ -10,6 +10,11 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light.DarkActionBar">
 
+        <activity android:name=".AdminActivity"
+    tools:ignore="WrongManifestParent"/>
+
+
+
         <activity android:name=".LoginActivity"
             android:exported="true">
             <intent-filter>

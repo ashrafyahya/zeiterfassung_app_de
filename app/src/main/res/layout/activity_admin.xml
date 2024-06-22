@@ -1,0 +1,25 @@
+<!-- activity_admin.xml -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fillViewport="true">
+        <TableLayout
+            android:id="@+id/adminTableLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:stretchColumns="1">
+        </TableLayout>
+    </ScrollView>
+
+    <Button
+        android:id="@+id/loadDataButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Load Data" />
+</LinearLayout>

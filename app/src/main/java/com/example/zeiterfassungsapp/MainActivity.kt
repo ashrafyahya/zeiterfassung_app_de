@@ -26,11 +26,12 @@ class MainActivity : AppCompatActivity() {
     private lateinit var statusTextView: TextView
     private lateinit var tableLayout: TableLayout
     private var timesVisible = false
+    private lateinit var adminButton: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
+    
         mAuth = FirebaseAuth.getInstance()
         db = FirebaseFirestore.getInstance()
         checkInButton = findViewById(R.id.checkInButton)
@@ -39,11 +40,18 @@ class MainActivity : AppCompatActivity() {
         logoutButton = findViewById(R.id.logoutButton)
         statusTextView = findViewById(R.id.statusTextView)
         tableLayout = findViewById(R.id.tableLayout)
-
+        adminButton = findViewById(R.id.adminButton)
+    
         checkInButton.setOnClickListener { checkIn() }
         checkOutButton.setOnClickListener { checkOut() }
         viewTimesButton.setOnClickListener { viewTimes() }
         logoutButton.setOnClickListener { logout() }
+
+        adminButton = findViewById(R.id.adminButton)
+        adminButton.setOnClickListener {
+            val intent = Intent(this, AdminActivity::class.java)
+            startActivity(intent)
+    }
     }
 
     private fun checkIn() {
