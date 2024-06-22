@@ -1,4 +1,7 @@
 package com.example.zeiterfassungsapp
+import java.text.SimpleDateFormat
+import java.util.Locale
+import java.util.Date
 
 import android.os.Bundle
 import android.widget.Button
@@ -15,6 +18,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var checkOutButton: Button
     private lateinit var viewTimesButton: Button
     private lateinit var statusTextView: TextView
+    private var timesVisible = false
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,6 +37,13 @@ class MainActivity : AppCompatActivity() {
         viewTimesButton.setOnClickListener { viewTimes() }
     }
 
+    private fun formatTime(timestamp: Long): String {
+        val sdf = SimpleDateFormat("dd.MM.yyyy HH:mm:ss", Locale.getDefault())
+        val date = Date(timestamp)
+        return sdf.format(date)
+    }
+
+
     private fun checkIn() {
         val user = mAuth.currentUser
         user?.let {
@@ -40,13 +52,18 @@ class MainActivity : AppCompatActivity() {
                 "checkIn" to System.currentTimeMillis()
             )
 
-            db.collection("timeEntries").add(timeEntry)
-                .addOnSuccessListener {
-                    statusTextView.text = "Checked In"
-                }
-                .addOnFailureListener { exception ->
-                    statusTextView.text = "Check In failed: ${exception.message}"
-                }
+            try {
+                db.collection("timeEntries").add(timeEntry)
+                    .addOnSuccessListener {
+                        val formattedTime = formatTime(System.currentTimeMillis())
+                        statusTextView.text = "Checked In at $formattedTime"
+                    }
+                    .addOnFailureListener { exception ->
+                        statusTextView.text = "Check In failed: ${exception.message}"
+                    }
+            } catch (e: Exception) {
+                statusTextView.text = "Check In failed: ${e.message}"
+            }
         } ?: run {
             statusTextView.text = "User not signed in"
         }
@@ -60,38 +77,64 @@ class MainActivity : AppCompatActivity() {
                 "checkOut" to System.currentTimeMillis()
             )
 
-            db.collection("timeEntries").add(timeEntry)
-                .addOnSuccessListener {
-                    statusTextView.text = "Checked Out"
-                }
-                .addOnFailureListener { exception ->
-                    statusTextView.text = "Check Out failed: ${exception.message}"
-                }
+            try {
+                db.collection("timeEntries").add(timeEntry)
+                    .addOnSuccessListener {
+                        val formattedTime = formatTime(System.currentTimeMillis())
+                        statusTextView.text = "Checked Out at $formattedTime"
+                    }
+                    .addOnFailureListener { exception ->
+                        statusTextView.text = "Check Out failed: ${exception.message}"
+                    }
+            } catch (e: Exception) {
+                statusTextView.text = "Check Out failed: ${e.message}"
+            }
         } ?: run {
             statusTextView.text = "User not signed in"
         }
     }
 
     private fun viewTimes() {
-        val user = mAuth.currentUser
-        user?.let {
-            db.collection("timeEntries").whereEqualTo("userId", it.uid)
-                .get()
-                .addOnCompleteListener { task ->
-                    if (task.isSuccessful) {
-                        val times = StringBuilder()
-                        for (document in task.result) {
-                            val checkInTime = document.getLong("checkIn")
-                            val checkOutTime = document.getLong("checkOut")
-                            times.append("Check In: $checkInTime Check Out: $checkOutTime\n")
+        if (timesVisible) {
+            // Zeiten ausblenden
+            statusTextView.text = ""
+            viewTimesButton.text = "View Times"
+            timesVisible = false
+        } else {
+            // Zeiten anzeigen
+            val user = mAuth.currentUser
+            user?.let {
+                try {
+                    db.collection("timeEntries").whereEqualTo("userId", it.uid)
+                        .get()
+                        .addOnCompleteListener { task ->
+                            if (task.isSuccessful) {
+                                val times = StringBuilder()
+                                for (document in task.result) {
+                                    val checkInTime = document.getLong("checkIn")
+                                    val checkOutTime = document.getLong("checkOut")
+                                    if (checkInTime != null) {
+                                        times.append("Check In: ${formatTime(checkInTime)} ")
+                                    }
+                                    if (checkOutTime != null) {
+                                        times.append("Check Out: ${formatTime(checkOutTime)}\n")
+                                    }
+                                }
+                                statusTextView.text = times.toString()
+                                viewTimesButton.text = "Hide Times"
+                                timesVisible = true
+                            } else {
+                                statusTextView.text = "Failed to load times: ${task.exception?.message}"
+                            }
                         }
-                        statusTextView.text = times.toString()
-                    } else {
-                        statusTextView.text = "Failed to load times: ${task.exception?.message}"
-                    }
+                } catch (e: Exception) {
+                    statusTextView.text = "Failed to load times: ${e.message}"
                 }
-        } ?: run {
-            statusTextView.text = "User not signed in"
+            } ?: run {
+                statusTextView.text = "User not signed in"
+            }
         }
     }
+    
+
 }
