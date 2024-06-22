@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "628484389927",
+    "project_id": "zeiterfassungsapp-20f15",
+    "storage_bucket": "zeiterfassungsapp-20f15.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:628484389927:android:6886d14361ded671caa202",
+        "android_client_info": {
+          "package_name": "com.example.zeiterfassungsapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBiO9JLk9RQKQSTctZhaNM18YdvXIY4MuA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
