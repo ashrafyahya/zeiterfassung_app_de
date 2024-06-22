@@ -12,6 +12,8 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import android.content.Intent
+
 
 class MainActivity : AppCompatActivity() {
 
@@ -20,6 +22,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var checkInButton: Button
     private lateinit var checkOutButton: Button
     private lateinit var viewTimesButton: Button
+    private lateinit var logoutButton: Button
     private lateinit var statusTextView: TextView
     private lateinit var tableLayout: TableLayout
     private var timesVisible = false
@@ -33,18 +36,14 @@ class MainActivity : AppCompatActivity() {
         checkInButton = findViewById(R.id.checkInButton)
         checkOutButton = findViewById(R.id.checkOutButton)
         viewTimesButton = findViewById(R.id.viewTimesButton)
+        logoutButton = findViewById(R.id.logoutButton)
         statusTextView = findViewById(R.id.statusTextView)
         tableLayout = findViewById(R.id.tableLayout)
 
         checkInButton.setOnClickListener { checkIn() }
         checkOutButton.setOnClickListener { checkOut() }
         viewTimesButton.setOnClickListener { viewTimes() }
-    }
-
-    private fun formatTime(timestamp: Long): String {
-        val sdf = SimpleDateFormat("dd.MM.yyyy HH:mm:ss", Locale.getDefault())
-        val date = Date(timestamp)
-        return sdf.format(date)
+        logoutButton.setOnClickListener { logout() }
     }
 
     private fun checkIn() {
@@ -58,8 +57,7 @@ class MainActivity : AppCompatActivity() {
             try {
                 db.collection("timeEntries").add(timeEntry)
                     .addOnSuccessListener {
-                        val formattedTime = formatTime(System.currentTimeMillis())
-                        statusTextView.text = "Checked In at $formattedTime"
+                        statusTextView.text = "Checked In"
                     }
                     .addOnFailureListener { exception ->
                         statusTextView.text = "Check In failed: ${exception.message}"
@@ -83,8 +81,7 @@ class MainActivity : AppCompatActivity() {
             try {
                 db.collection("timeEntries").add(timeEntry)
                     .addOnSuccessListener {
-                        val formattedTime = formatTime(System.currentTimeMillis())
-                        statusTextView.text = "Checked Out at $formattedTime"
+                        statusTextView.text = "Checked Out"
                     }
                     .addOnFailureListener { exception ->
                         statusTextView.text = "Check Out failed: ${exception.message}"
@@ -113,7 +110,7 @@ class MainActivity : AppCompatActivity() {
                         .addOnCompleteListener { task ->
                             if (task.isSuccessful) {
                                 tableLayout.removeAllViews()
-    
+
                                 // Header row
                                 val headerRow = TableRow(this)
                                 val checkInHeader = TextView(this).apply {
@@ -129,7 +126,7 @@ class MainActivity : AppCompatActivity() {
                                 headerRow.addView(checkInHeader)
                                 headerRow.addView(checkOutHeader)
                                 tableLayout.addView(headerRow)
-    
+
                                 // Data rows
                                 for (document in task.result) {
                                     val checkInTime = document.getLong("checkIn")
@@ -162,5 +159,17 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
-    
+
+    private fun formatTime(timestamp: Long): String {
+        val sdf = SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault())
+        val date = Date(timestamp)
+        return sdf.format(date)
+    }
+
+    private fun logout() {
+        mAuth.signOut()
+        val intent = Intent(this, LoginActivity::class.java)
+        startActivity(intent)
+        finish()
+    }   
 }
