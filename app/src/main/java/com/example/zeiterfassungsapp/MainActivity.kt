@@ -113,7 +113,7 @@ class MainActivity : AppCompatActivity() {
                         .addOnCompleteListener { task ->
                             if (task.isSuccessful) {
                                 tableLayout.removeAllViews()
-
+    
                                 // Header row
                                 val headerRow = TableRow(this)
                                 val checkInHeader = TextView(this).apply {
@@ -129,7 +129,7 @@ class MainActivity : AppCompatActivity() {
                                 headerRow.addView(checkInHeader)
                                 headerRow.addView(checkOutHeader)
                                 tableLayout.addView(headerRow)
-
+    
                                 // Data rows
                                 for (document in task.result) {
                                     val checkInTime = document.getLong("checkIn")
@@ -151,8 +151,7 @@ class MainActivity : AppCompatActivity() {
                                 viewTimesButton.text = "Hide Times"
                                 timesVisible = true
                             } else {
-                                statusTextView.text =
-                                    "Failed to load times: ${task.exception?.message}"
+                                statusTextView.text = "Failed to load times: ${task.exception?.message}"
                             }
                         }
                 } catch (e: Exception) {
@@ -163,4 +162,5 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
+    
 }
