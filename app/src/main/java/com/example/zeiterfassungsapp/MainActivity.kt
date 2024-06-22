@@ -1,9 +1,12 @@
 package com.example.zeiterfassungsapp
+import android.graphics.Typeface
 import java.text.SimpleDateFormat
 import java.util.Locale
 import java.util.Date
-
+import android.widget.TableLayout
+import android.widget.TableRow
 import android.os.Bundle
+import android.view.View
 import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -18,8 +21,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var checkOutButton: Button
     private lateinit var viewTimesButton: Button
     private lateinit var statusTextView: TextView
+    private lateinit var tableLayout: TableLayout
     private var timesVisible = false
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,6 +34,7 @@ class MainActivity : AppCompatActivity() {
         checkOutButton = findViewById(R.id.checkOutButton)
         viewTimesButton = findViewById(R.id.viewTimesButton)
         statusTextView = findViewById(R.id.statusTextView)
+        tableLayout = findViewById(R.id.tableLayout)
 
         checkInButton.setOnClickListener { checkIn() }
         checkOutButton.setOnClickListener { checkOut() }
@@ -42,7 +46,6 @@ class MainActivity : AppCompatActivity() {
         val date = Date(timestamp)
         return sdf.format(date)
     }
-
 
     private fun checkIn() {
         val user = mAuth.currentUser
@@ -97,7 +100,7 @@ class MainActivity : AppCompatActivity() {
     private fun viewTimes() {
         if (timesVisible) {
             // Zeiten ausblenden
-            statusTextView.text = ""
+            tableLayout.visibility = View.GONE
             viewTimesButton.text = "View Times"
             timesVisible = false
         } else {
@@ -109,22 +112,47 @@ class MainActivity : AppCompatActivity() {
                         .get()
                         .addOnCompleteListener { task ->
                             if (task.isSuccessful) {
-                                val times = StringBuilder()
+                                tableLayout.removeAllViews()
+
+                                // Header row
+                                val headerRow = TableRow(this)
+                                val checkInHeader = TextView(this).apply {
+                                    text = "Check In"
+                                    setPadding(8, 8, 8, 8)
+                                    setTypeface(null, Typeface.BOLD)
+                                }
+                                val checkOutHeader = TextView(this).apply {
+                                    text = "Check Out"
+                                    setPadding(8, 8, 8, 8)
+                                    setTypeface(null, Typeface.BOLD)
+                                }
+                                headerRow.addView(checkInHeader)
+                                headerRow.addView(checkOutHeader)
+                                tableLayout.addView(headerRow)
+
+                                // Data rows
                                 for (document in task.result) {
                                     val checkInTime = document.getLong("checkIn")
                                     val checkOutTime = document.getLong("checkOut")
-                                    if (checkInTime != null) {
-                                        times.append("Check In: ${formatTime(checkInTime)} ")
+                                    val row = TableRow(this)
+                                    val checkInView = TextView(this).apply {
+                                        text = checkInTime?.let { formatTime(it) } ?: "N/A"
+                                        setPadding(8, 8, 8, 8)
                                     }
-                                    if (checkOutTime != null) {
-                                        times.append("Check Out: ${formatTime(checkOutTime)}\n")
+                                    val checkOutView = TextView(this).apply {
+                                        text = checkOutTime?.let { formatTime(it) } ?: "N/A"
+                                        setPadding(8, 8, 8, 8)
                                     }
+                                    row.addView(checkInView)
+                                    row.addView(checkOutView)
+                                    tableLayout.addView(row)
                                 }
-                                statusTextView.text = times.toString()
+                                tableLayout.visibility = View.VISIBLE
                                 viewTimesButton.text = "Hide Times"
                                 timesVisible = true
                             } else {
-                                statusTextView.text = "Failed to load times: ${task.exception?.message}"
+                                statusTextView.text =
+                                    "Failed to load times: ${task.exception?.message}"
                             }
                         }
                 } catch (e: Exception) {
@@ -135,6 +163,4 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
-    
-
 }
