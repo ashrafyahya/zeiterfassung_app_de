@@ -47,10 +47,19 @@
         android:layout_height="wrap_content"
         android:fillViewport="true">
         <TableLayout
-            android:id="@+id/tableLayout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:stretchColumns="1">
-        </TableLayout>
+    android:id="@+id/tableLayout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:stretchColumns="1"
+    android:background="#FFFFFF"
+    android:layout_margin="16dp"
+    android:padding="16dp"
+    android:visibility="gone"
+    android:divider="@android:color/darker_gray"
+    android:showDividers="middle"
+    android:layout_marginTop="10dp"
+    android:layout_marginBottom="10dp">
+</TableLayout>
+
     </ScrollView>
 </LinearLayout>

@@ -1,4 +1,5 @@
 package com.example.zeiterfassungsapp
+import android.graphics.Color
 
 import android.graphics.Typeface
 import java.text.SimpleDateFormat
@@ -141,33 +142,48 @@ class MainActivity : AppCompatActivity() {
                         .addOnCompleteListener { task ->
                             if (task.isSuccessful) {
                                 tableLayout.removeAllViews()
-
-                                val headerRow = TableRow(this)
+    
+                                val headerRow = TableRow(this).apply {
+                                    setBackgroundColor(Color.parseColor("#CCCCCC"))
+                                    setPadding(16, 16, 16, 16)
+                                }
+    
                                 val checkInHeader = TextView(this).apply {
                                     text = "Check In"
                                     setPadding(8, 8, 8, 8)
                                     setTypeface(null, Typeface.BOLD)
+                                    setTextColor(Color.BLACK)
+                                    setBackgroundColor(Color.parseColor("#DDDDDD"))
                                 }
                                 val checkOutHeader = TextView(this).apply {
                                     text = "Check Out"
                                     setPadding(8, 8, 8, 8)
                                     setTypeface(null, Typeface.BOLD)
+                                    setTextColor(Color.BLACK)
+                                    setBackgroundColor(Color.parseColor("#DDDDDD"))
                                 }
                                 headerRow.addView(checkInHeader)
                                 headerRow.addView(checkOutHeader)
                                 tableLayout.addView(headerRow)
-
+    
                                 for (document in task.result) {
                                     val checkInTime = document.getLong("checkIn")
                                     val checkOutTime = document.getLong("checkOut")
-                                    val row = TableRow(this)
+                                    val row = TableRow(this).apply {
+                                        setBackgroundColor(Color.parseColor("#FFFFFF"))
+                                        setPadding(16, 16, 16, 16)
+                                    }
                                     val checkInView = TextView(this).apply {
                                         text = checkInTime?.let { formatTime(it) } ?: "N/A"
                                         setPadding(8, 8, 8, 8)
+                                        setTextColor(Color.BLACK)
+                                        setBackgroundResource(R.drawable.cell_border)
                                     }
                                     val checkOutView = TextView(this).apply {
                                         text = checkOutTime?.let { formatTime(it) } ?: "N/A"
                                         setPadding(8, 8, 8, 8)
+                                        setTextColor(Color.BLACK)
+                                        setBackgroundResource(R.drawable.cell_border)
                                     }
                                     row.addView(checkInView)
                                     row.addView(checkOutView)
@@ -188,9 +204,10 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
+    
 
     private fun formatTime(timestamp: Long): String {
-        val sdf = SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault())
+        val sdf = SimpleDateFormat("dd.MM.yyyy HH:mm:ss", Locale.getDefault())
         val date = Date(timestamp)
         return sdf.format(date)
     }
