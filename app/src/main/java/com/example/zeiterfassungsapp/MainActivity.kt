@@ -1,4 +1,5 @@
 package com.example.zeiterfassungsapp
+
 import android.graphics.Typeface
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -14,8 +15,8 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import android.content.Intent
 import android.widget.Toast
+import com.google.firebase.firestore.FirebaseFirestoreException
 import com.google.firebase.firestore.Query
-
 
 class MainActivity : AppCompatActivity() {
 
@@ -33,7 +34,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-    
+
         mAuth = FirebaseAuth.getInstance()
         db = FirebaseFirestore.getInstance()
         checkInButton = findViewById(R.id.checkInButton)
@@ -43,75 +44,97 @@ class MainActivity : AppCompatActivity() {
         statusTextView = findViewById(R.id.statusTextView)
         tableLayout = findViewById(R.id.tableLayout)
         adminButton = findViewById(R.id.adminButton)
-    
+
         checkInButton.setOnClickListener { checkIn() }
         checkOutButton.setOnClickListener { checkOut() }
         viewTimesButton.setOnClickListener { viewTimes() }
         logoutButton.setOnClickListener { logout() }
 
-        adminButton = findViewById(R.id.adminButton)
         adminButton.setOnClickListener {
             isAdminUser { isAdmin ->
                 if (isAdmin) {
-                val intent = Intent(this, AdminActivity::class.java)
-                startActivity(intent)
-                adminButton.visibility = View.VISIBLE // Beispiel: Sichtbarkeit eines Admin-Buttons ändern
-
-            } else {
-                // Hier können Sie eine Nachricht anzeigen oder andere Maßnahmen ergreifen,
-                // wenn der Benutzer kein Administrator ist
-                Toast.makeText(this, "You are not authorized as an admin", Toast.LENGTH_SHORT).show()
-                adminButton.visibility = View.GONE // Beispiel: Admin-Button ausblenden
-
-            }}
-    }
+                    val intent = Intent(this, AdminActivity::class.java)
+                    startActivity(intent)
+                    adminButton.visibility = View.VISIBLE
+                } else {
+                    Toast.makeText(this, "You are not authorized as an admin", Toast.LENGTH_SHORT).show()
+                    adminButton.visibility = View.GONE
+                }
+            }
+        }
     }
 
     private fun checkIn() {
         val user = mAuth.currentUser
         user?.let { currentUser ->
-            val checkInTime = System.currentTimeMillis()
-    
-            // Speichern des Eintrags in Firestore
-            saveTimeEntry(currentUser.uid, checkInTime, null)
+            db.collection("timeEntries")
+                .whereEqualTo("userId", currentUser.uid)
+                .whereEqualTo("checkOut", null)
+                .limit(1)
+                .get()
+                .addOnSuccessListener { documents ->
+                    if (!documents.isEmpty) {
+                        Toast.makeText(this, "Already Checked In", Toast.LENGTH_SHORT).show()
+                        return@addOnSuccessListener
+                    } else {
+                        saveTimeEntry(currentUser.uid, System.currentTimeMillis(), null)
+                    }
+                }
+                .addOnFailureListener { exception ->
+                    if (exception is FirebaseFirestoreException && exception.code == FirebaseFirestoreException.Code.FAILED_PRECONDITION) {
+                        Toast.makeText(this, "Failed to check in: user is already checked in", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(this, "Check In failed: ${exception.message}", Toast.LENGTH_SHORT).show()
+                    }
+                }
         } ?: run {
-            // Benutzer ist nicht angemeldet
-            statusTextView.text = "Benutzer ist nicht angemeldet"
+            Toast.makeText(this, "User not signed in", Toast.LENGTH_SHORT).show()
         }
     }
+    
+    
 
     private fun checkOut() {
         val user = mAuth.currentUser
-        user?.let {
-            val timeEntry = hashMapOf(
-                "userId" to it.uid,
-                "checkOut" to System.currentTimeMillis()
-            )
-    
-            try {
-                db.collection("timeEntries").add(timeEntry)
-                    .addOnSuccessListener {
-                        statusTextView.text = "Checked Out"
+        user?.let { currentUser ->
+            db.collection("timeEntries")
+               .whereEqualTo("userId", currentUser.uid)
+               .whereEqualTo("checkOut", null)
+               .limit(1)
+               .get()
+               .addOnSuccessListener { documents ->
+                    if (!documents.isEmpty) {
+                        val document = documents.documents[0]
+                        val checkOutTime = System.currentTimeMillis()
+                        document.reference.update("checkOut", checkOutTime)
+                           .addOnSuccessListener {
+                                Toast.makeText(this, "Checked Out", Toast.LENGTH_SHORT).show()
+                                // Delete the document after checking out
+                                document.reference.delete()
+                            }
+                           .addOnFailureListener { exception ->
+                                Toast.makeText(this, "Check Out failed: ${exception.message}", Toast.LENGTH_SHORT).show()
+                            }
+                    } else {
+                        Toast.makeText(this, "No check-in found to check out", Toast.LENGTH_SHORT).show()
                     }
-                    .addOnFailureListener { exception ->
-                        statusTextView.text = "Check Out failed: ${exception.message}"
-                    }
-            } catch (e: Exception) {
-                statusTextView.text = "Check Out failed: ${e.message}"
-            }
-        } ?: run {
-            statusTextView.text = "User not signed in"
+                }
+               .addOnFailureListener { exception ->
+                    Toast.makeText(this, "Check Out failed: ${exception.message}", Toast.LENGTH_SHORT).show()
+                }
+        }?: run {
+            Toast.makeText(this, "User not signed in", Toast.LENGTH_SHORT).show()
         }
     }
     
+    
+
     private fun viewTimes() {
         if (timesVisible) {
-            // Zeiten ausblenden
             tableLayout.visibility = View.GONE
             viewTimesButton.text = "View Times"
             timesVisible = false
         } else {
-            // Zeiten anzeigen
             val user = mAuth.currentUser
             user?.let {
                 try {
@@ -121,7 +144,6 @@ class MainActivity : AppCompatActivity() {
                             if (task.isSuccessful) {
                                 tableLayout.removeAllViews()
 
-                                // Header row
                                 val headerRow = TableRow(this)
                                 val checkInHeader = TextView(this).apply {
                                     text = "Check In"
@@ -137,7 +159,6 @@ class MainActivity : AppCompatActivity() {
                                 headerRow.addView(checkOutHeader)
                                 tableLayout.addView(headerRow)
 
-                                // Data rows
                                 for (document in task.result) {
                                     val checkInTime = document.getLong("checkIn")
                                     val checkOutTime = document.getLong("checkOut")
@@ -158,14 +179,14 @@ class MainActivity : AppCompatActivity() {
                                 viewTimesButton.text = "Hide Times"
                                 timesVisible = true
                             } else {
-                                statusTextView.text = "Failed to load times: ${task.exception?.message}"
+                                Toast.makeText(this, "Failed to load times: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
                             }
                         }
                 } catch (e: Exception) {
-                    statusTextView.text = "Failed to load times: ${e.message}"
+                    Toast.makeText(this, "Failed to load times: ${e.message}", Toast.LENGTH_SHORT).show()
                 }
             } ?: run {
-                statusTextView.text = "User not signed in"
+                Toast.makeText(this, "User not signed in", Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -182,10 +203,10 @@ class MainActivity : AppCompatActivity() {
         startActivity(intent)
         finish()
     }
-    
+
     private fun isAdminUser(callback: (Boolean) -> Unit) {
         val user = mAuth.currentUser
-    
+
         user?.let {
             db.collection("users").document(it.uid)
                 .get()
@@ -193,45 +214,39 @@ class MainActivity : AppCompatActivity() {
                     if (document.exists()) {
                         val role = document.getString("role")
                         if (role == "admin") {
-                            // Der Benutzer ist ein Administrator
                             callback(true)
                         } else {
-                            // Standardmäßig kein Administrator
                             callback(false)
                         }
                     } else {
-                        // Dokument existiert nicht
                         callback(false)
                     }
                 }
                 .addOnFailureListener { exception ->
-                    // Fehler bei der Überprüfung der Berechtigung
                     callback(false)
                 }
         } ?: run {
-            // Benutzer ist nicht angemeldet
             callback(false)
         }
     }
-    
-    
+
     private fun saveTimeEntry(userId: String, checkInTime: Long, checkOutTime: Long?) {
         val timeEntry = hashMapOf(
             "userId" to userId,
             "checkIn" to checkInTime,
             "checkOut" to checkOutTime
         )
-    
+
         try {
             db.collection("timeEntries").add(timeEntry)
-                .addOnSuccessListener { documentReference ->
-                    statusTextView.text = "Erfolgreich eingecheckt"
+                .addOnSuccessListener {
+                    Toast.makeText(this, "Checked In", Toast.LENGTH_SHORT).show()
                 }
                 .addOnFailureListener { e ->
-                    statusTextView.text = "Einchecken fehlgeschlagen: ${e.message}"
+                    Toast.makeText(this, "Check In failed: ${e.message}", Toast.LENGTH_SHORT).show()
                 }
         } catch (e: Exception) {
-            statusTextView.text = "Einchecken fehlgeschlagen: ${e.message}"
+            Toast.makeText(this, "Check In failed: ${e.message}", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -250,7 +265,4 @@ class MainActivity : AppCompatActivity() {
                 // Fehler beim Abrufen der Zeiteinträge
             }
     }
-    
-    
-       
 }
