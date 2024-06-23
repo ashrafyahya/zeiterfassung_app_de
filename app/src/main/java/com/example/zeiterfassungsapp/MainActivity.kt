@@ -109,8 +109,6 @@ class MainActivity : AppCompatActivity() {
                         document.reference.update("checkOut", checkOutTime)
                            .addOnSuccessListener {
                                 Toast.makeText(this, "Checked Out", Toast.LENGTH_SHORT).show()
-                                // Delete the document after checking out
-                                document.reference.delete()
                             }
                            .addOnFailureListener { exception ->
                                 Toast.makeText(this, "Check Out failed: ${exception.message}", Toast.LENGTH_SHORT).show()
