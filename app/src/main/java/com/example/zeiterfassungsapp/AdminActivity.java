@@ -1,11 +1,12 @@
 package com.example.zeiterfassungsapp;
 
 import android.os.Bundle;
-import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -20,6 +21,8 @@ public class AdminActivity extends AppCompatActivity {
     private FirebaseFirestore db;
     private TableLayout adminTableLayout;
     private Button loadDataButton;
+    private EditText userIdEditText, newRoleEditText;
+    private Button changeRoleButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,8 +32,12 @@ public class AdminActivity extends AppCompatActivity {
         db = FirebaseFirestore.getInstance();
         adminTableLayout = findViewById(R.id.adminTableLayout);
         loadDataButton = findViewById(R.id.loadDataButton);
+        userIdEditText = findViewById(R.id.userIdEditText);
+        newRoleEditText = findViewById(R.id.newRoleEditText);
+        changeRoleButton = findViewById(R.id.changeRoleButton);
 
         loadDataButton.setOnClickListener(view -> loadAllData());
+        changeRoleButton.setOnClickListener(view -> changeUserRole());
     }
 
     private void loadAllData() {
@@ -79,5 +86,24 @@ public class AdminActivity extends AppCompatActivity {
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault());
         Date date = new Date(timestamp);
         return sdf.format(date);
+    }
+
+    private void changeUserRole() {
+        String userId = userIdEditText.getText().toString().trim();
+        String newRole = newRoleEditText.getText().toString().trim();
+
+        if (userId.isEmpty() || newRole.isEmpty()) {
+            Toast.makeText(this, "Please fill in all fields", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        db.collection("users").document(userId)
+                .update("role", newRole)
+                .addOnSuccessListener(aVoid -> {
+                    Toast.makeText(AdminActivity.this, "User role updated successfully", Toast.LENGTH_SHORT).show();
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(AdminActivity.this, "Failed to update user role: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
     }
 }
