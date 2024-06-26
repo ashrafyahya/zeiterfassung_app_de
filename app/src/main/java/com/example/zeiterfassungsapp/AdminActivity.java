@@ -11,6 +11,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -38,8 +39,53 @@ public class AdminActivity extends AppCompatActivity {
 
         loadDataButton.setOnClickListener(view -> loadAllData());
         changeRoleButton.setOnClickListener(view -> changeUserRole());
+
+        // Beispiel: Laden aller Benutzerdaten beim Start der Aktivität
+        loadAllUsers();
     }
 
+    private void loadAllUsers() {
+        db.collection("users").get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                adminTableLayout.removeAllViews();
+    
+                // Header row
+                TableRow headerRow = new TableRow(AdminActivity.this);
+                TextView emailHeader = new TextView(AdminActivity.this);
+                emailHeader.setText("Email");
+                emailHeader.setPadding(8, 8, 8, 8);
+                emailHeader.setTypeface(null, android.graphics.Typeface.BOLD);
+                TextView roleHeader = new TextView(AdminActivity.this);
+                roleHeader.setText("Role");
+                roleHeader.setPadding(8, 8, 8, 8);
+                roleHeader.setTypeface(null, android.graphics.Typeface.BOLD);
+                headerRow.addView(emailHeader);
+                headerRow.addView(roleHeader);
+                adminTableLayout.addView(headerRow);
+    
+                // Data rows
+                for (QueryDocumentSnapshot document : task.getResult()) {
+                    String email = document.getString("email");
+                    String role = document.getString("role");
+    
+                    TableRow row = new TableRow(AdminActivity.this);
+                    TextView emailView = new TextView(AdminActivity.this);
+                    emailView.setText(email != null ? email : "N/A");
+                    emailView.setPadding(8, 8, 8, 8);
+                    TextView roleView = new TextView(AdminActivity.this);
+                    roleView.setText(role != null ? role : "N/A");
+                    roleView.setPadding(8, 8, 8, 8);
+    
+                    row.addView(emailView);
+                    row.addView(roleView);
+                    adminTableLayout.addView(row);
+                }
+            } else {
+                Toast.makeText(AdminActivity.this, "Failed to load users: " + task.getException(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+    
     private void loadAllData() {
         db.collection("timeEntries").get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
@@ -91,12 +137,12 @@ public class AdminActivity extends AppCompatActivity {
     private void changeUserRole() {
         String userId = userIdEditText.getText().toString().trim();
         String newRole = newRoleEditText.getText().toString().trim();
-
+    
         if (userId.isEmpty() || newRole.isEmpty()) {
             Toast.makeText(this, "Please fill in all fields", Toast.LENGTH_SHORT).show();
             return;
         }
-
+    
         db.collection("users").document(userId)
                 .update("role", newRole)
                 .addOnSuccessListener(aVoid -> {
@@ -106,4 +152,5 @@ public class AdminActivity extends AppCompatActivity {
                     Toast.makeText(AdminActivity.this, "Failed to update user role: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
     }
+    
 }

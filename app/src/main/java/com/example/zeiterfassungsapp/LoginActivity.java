@@ -12,6 +12,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -58,30 +59,55 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void registerUser() {
-        String email = emailEditText.getText().toString().trim();
-        String password = passwordEditText.getText().toString().trim();
+    String email = emailEditText.getText().toString().trim();
+    String password = passwordEditText.getText().toString().trim();
 
-        if (TextUtils.isEmpty(email) || TextUtils.isEmpty(password)) {
-            Toast.makeText(LoginActivity.this, "Please fill in all fields", Toast.LENGTH_SHORT).show();
-            return;
-        }
+    if (TextUtils.isEmpty(email) || TextUtils.isEmpty(password)) {
+        Toast.makeText(LoginActivity.this, "Please fill in all fields", Toast.LENGTH_SHORT).show();
+        return;
+    }
 
-        mAuth.createUserWithEmailAndPassword(email, password)
-            .addOnCompleteListener(this, task -> {
-                if (task.isSuccessful()) {
-                    FirebaseUser user = mAuth.getCurrentUser();
-                    if (user != null) {
-                        // Benutzerinformationen in Firestore speichern
-                        saveUserToFirestore(user);
-                    } else {
-                        updateUI(null);
-                    }
+    mAuth.createUserWithEmailAndPassword(email, password)
+        .addOnCompleteListener(this, task -> {
+            if (task.isSuccessful()) {
+                FirebaseUser user = mAuth.getCurrentUser();
+                if (user != null) {
+                    // Benutzerdefinierte ID erstellen oder automatisch generieren
+                    String customUserId = generateCustomUserId(); // Funktion zum Generieren der ID
+                    // Benutzerdaten in Firestore speichern
+                    Map<String, Object> userData = new HashMap<>();
+                    userData.put("email", email);
+                    userData.put("customUserId", customUserId); // Benutzerdefinierte ID speichern
+                    userData.put("role", "user"); // Standardrolle für jeden Benutzer
+                    db.collection("users").document(user.getUid())
+                        .set(userData)
+                        .addOnSuccessListener(aVoid -> {
+                            Toast.makeText(LoginActivity.this, "Registration successful.", Toast.LENGTH_SHORT).show();
+                            updateUI(user);
+                        })
+                        .addOnFailureListener(e -> {
+                            Toast.makeText(LoginActivity.this, "Registration failed.", Toast.LENGTH_SHORT).show();
+                            updateUI(null);
+                        });
                 } else {
-                    Toast.makeText(LoginActivity.this, "Registration failed.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(LoginActivity.this, "User is null.", Toast.LENGTH_SHORT).show();
                     updateUI(null);
                 }
-            });
+            } else {
+                Toast.makeText(LoginActivity.this, "Registration failed.", Toast.LENGTH_SHORT).show();
+                updateUI(null);
+            }
+        });
+}
+
+    
+    private String generateCustomUserId() {
+        // Beispiel für die Generierung einer sechsstelligen numerischen ID
+        Random random = new Random();
+        int number = random.nextInt(900000) + 100000; // Zufällige Zahl zwischen 100000 und 999999
+        return String.valueOf(number);
     }
+    
 
     private void saveUserToFirestore(FirebaseUser user) {
         String userId = user.getUid();

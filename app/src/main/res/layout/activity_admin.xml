@@ -31,11 +31,12 @@
         android:paddingBottom="8dp" />
 
     <EditText
-        android:id="@+id/userIdEditText"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="User ID"
-        android:inputType="text" />
+    android:id="@+id/userIdEditText"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:hint="User ID (e.g., 100001)"
+    android:inputType="number" />
+
 
     <EditText
         android:id="@+id/newRoleEditText"
