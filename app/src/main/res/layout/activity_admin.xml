@@ -13,12 +13,16 @@
         android:text="Load Data" />
 
     <!-- Table Layout for Time Entries -->
-    <TableLayout
-        android:id="@+id/adminTableLayout"
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:stretchColumns="0,1">
-    </TableLayout>
+        android:layout_height="wrap_content">
+        <TableLayout
+            android:id="@+id/adminTableLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:stretchColumns="0,1">
+        </TableLayout>
+    </ScrollView>
 
     <!-- Role Management Section -->
     <TextView
@@ -31,12 +35,11 @@
         android:paddingBottom="8dp" />
 
     <EditText
-    android:id="@+id/userIdEditText"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:hint="User ID (e.g., 100001)"
-    android:inputType="number" />
-
+        android:id="@+id/userIdEditText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="User ID (e.g., 100001)"
+        android:inputType="number" />
 
     <EditText
         android:id="@+id/newRoleEditText"

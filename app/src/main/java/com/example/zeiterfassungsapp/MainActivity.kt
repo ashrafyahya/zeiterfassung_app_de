@@ -129,81 +129,108 @@ class MainActivity : AppCompatActivity() {
     
 
     private fun viewTimes() {
-        if (timesVisible) {
-            tableLayout.visibility = View.GONE
-            viewTimesButton.text = "View Times"
-            timesVisible = false
-        } else {
-            val user = mAuth.currentUser
-            user?.let {
-                try {
-                    db.collection("timeEntries").whereEqualTo("userId", it.uid)
-                        .get()
-                        .addOnCompleteListener { task ->
-                            if (task.isSuccessful) {
-                                tableLayout.removeAllViews()
-    
-                                val headerRow = TableRow(this).apply {
-                                    setBackgroundColor(Color.parseColor("#CCCCCC"))
+    if (timesVisible) {
+        tableLayout.visibility = View.GONE
+        viewTimesButton.text = "View Times"
+        timesVisible = false
+    } else {
+        val user = mAuth.currentUser
+        user?.let {
+            try {
+                db.collection("timeEntries").whereEqualTo("userId", it.uid)
+                    .get()
+                    .addOnCompleteListener { task ->
+                        if (task.isSuccessful) {
+                            tableLayout.removeAllViews()
+
+                            val headerRow = TableRow(this).apply {
+                                setBackgroundColor(Color.parseColor("#CCCCCC"))
+                                setPadding(16, 16, 16, 16)
+                            }
+
+                            val checkInHeader = TextView(this).apply {
+                                text = "Check In"
+                                setPadding(8, 8, 8, 8)
+                                setTypeface(null, Typeface.BOLD)
+                                setTextColor(Color.BLACK)
+                                setBackgroundColor(Color.parseColor("#DDDDDD"))
+                            }
+                            val checkOutHeader = TextView(this).apply {
+                                text = "Check Out"
+                                setPadding(8, 8, 8, 8)
+                                setTypeface(null, Typeface.BOLD)
+                                setTextColor(Color.BLACK)
+                                setBackgroundColor(Color.parseColor("#DDDDDD"))
+                            }
+                            val durationHeader = TextView(this).apply {
+                                text = "Duration"
+                                setPadding(8, 8, 8, 8)
+                                setTypeface(null, Typeface.BOLD)
+                                setTextColor(Color.BLACK)
+                                setBackgroundColor(Color.parseColor("#DDDDDD"))
+                            }
+                            headerRow.addView(checkInHeader)
+                            headerRow.addView(checkOutHeader)
+                            headerRow.addView(durationHeader)
+                            tableLayout.addView(headerRow)
+
+                            for (document in task.result) {
+                                val checkInTime = document.getLong("checkIn")
+                                val checkOutTime = document.getLong("checkOut")
+                                val row = TableRow(this).apply {
+                                    setBackgroundColor(Color.parseColor("#FFFFFF"))
                                     setPadding(16, 16, 16, 16)
                                 }
-    
-                                val checkInHeader = TextView(this).apply {
-                                    text = "Check In"
+                                val checkInView = TextView(this).apply {
+                                    text = checkInTime?.let { formatTime(it) } ?: "N/A"
                                     setPadding(8, 8, 8, 8)
-                                    setTypeface(null, Typeface.BOLD)
                                     setTextColor(Color.BLACK)
-                                    setBackgroundColor(Color.parseColor("#DDDDDD"))
+                                    setBackgroundResource(R.drawable.cell_border)
                                 }
-                                val checkOutHeader = TextView(this).apply {
-                                    text = "Check Out"
+                                val checkOutView = TextView(this).apply {
+                                    text = checkOutTime?.let { formatTime(it) } ?: "N/A"
                                     setPadding(8, 8, 8, 8)
-                                    setTypeface(null, Typeface.BOLD)
                                     setTextColor(Color.BLACK)
-                                    setBackgroundColor(Color.parseColor("#DDDDDD"))
+                                    setBackgroundResource(R.drawable.cell_border)
                                 }
-                                headerRow.addView(checkInHeader)
-                                headerRow.addView(checkOutHeader)
-                                tableLayout.addView(headerRow)
-    
-                                for (document in task.result) {
-                                    val checkInTime = document.getLong("checkIn")
-                                    val checkOutTime = document.getLong("checkOut")
-                                    val row = TableRow(this).apply {
-                                        setBackgroundColor(Color.parseColor("#FFFFFF"))
-                                        setPadding(16, 16, 16, 16)
+                                val durationView = TextView(this).apply {
+                                    text = if (checkInTime != null && checkOutTime != null) {
+                                        formatDuration(checkOutTime - checkInTime)
+                                    } else {
+                                        "N/A"
                                     }
-                                    val checkInView = TextView(this).apply {
-                                        text = checkInTime?.let { formatTime(it) } ?: "N/A"
-                                        setPadding(8, 8, 8, 8)
-                                        setTextColor(Color.BLACK)
-                                        setBackgroundResource(R.drawable.cell_border)
-                                    }
-                                    val checkOutView = TextView(this).apply {
-                                        text = checkOutTime?.let { formatTime(it) } ?: "N/A"
-                                        setPadding(8, 8, 8, 8)
-                                        setTextColor(Color.BLACK)
-                                        setBackgroundResource(R.drawable.cell_border)
-                                    }
-                                    row.addView(checkInView)
-                                    row.addView(checkOutView)
-                                    tableLayout.addView(row)
+                                    setPadding(8, 8, 8, 8)
+                                    setTextColor(Color.BLACK)
+                                    setBackgroundResource(R.drawable.cell_border)
                                 }
-                                tableLayout.visibility = View.VISIBLE
-                                viewTimesButton.text = "Hide Times"
-                                timesVisible = true
-                            } else {
-                                Toast.makeText(this, "Failed to load times: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
+                                row.addView(checkInView)
+                                row.addView(checkOutView)
+                                row.addView(durationView)
+                                tableLayout.addView(row)
                             }
+                            tableLayout.visibility = View.VISIBLE
+                            viewTimesButton.text = "Hide Times"
+                            timesVisible = true
+                        } else {
+                            Toast.makeText(this, "Failed to load times: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
                         }
-                } catch (e: Exception) {
-                    Toast.makeText(this, "Failed to load times: ${e.message}", Toast.LENGTH_SHORT).show()
-                }
-            } ?: run {
-                Toast.makeText(this, "User not signed in", Toast.LENGTH_SHORT).show()
+                    }
+            } catch (e: Exception) {
+                Toast.makeText(this, "Failed to load times: ${e.message}", Toast.LENGTH_SHORT).show()
             }
+        } ?: run {
+            Toast.makeText(this, "User not signed in", Toast.LENGTH_SHORT).show()
         }
     }
+}
+
+private fun formatDuration(durationMillis: Long): String {
+    val seconds = durationMillis / 1000 % 60
+    val minutes = durationMillis / (1000 * 60) % 60
+    val hours = durationMillis / (1000 * 60 * 60) % 24
+    return String.format("%02d:%02d:%02d", hours, minutes, seconds)
+}
+
     
 
     private fun formatTime(timestamp: Long): String {
