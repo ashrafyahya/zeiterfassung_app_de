@@ -50,9 +50,29 @@ public class LoginActivity extends AppCompatActivity {
             .addOnCompleteListener(this, task -> {
                 if (task.isSuccessful()) {
                     FirebaseUser user = mAuth.getCurrentUser();
-                    updateUI(user);
+                    if (user != null) {
+                        String customUserId = generateCustomUserId(); // Generiere eine sechsstellige numerische ID
+                        // Benutzerdaten in Firestore speichern
+                        Map<String, Object> userData = new HashMap<>();
+                        userData.put("email", email);
+                        userData.put("customUserId", customUserId); // Benutzerdefinierte ID speichern
+                        userData.put("role", "user"); // Standardrolle für jeden Benutzer
+                        db.collection("users").document(customUserId) // Verwende die benutzerdefinierte ID als Dokument-ID
+                            .set(userData)
+                            .addOnSuccessListener(aVoid -> {
+                                Toast.makeText(LoginActivity.this, "Registration successful.", Toast.LENGTH_SHORT).show();
+                                updateUI(user);
+                            })
+                            .addOnFailureListener(e -> {
+                                Toast.makeText(LoginActivity.this, "Registration failed.", Toast.LENGTH_SHORT).show();
+                                updateUI(null);
+                            });
+                    } else {
+                        Toast.makeText(LoginActivity.this, "User is null.", Toast.LENGTH_SHORT).show();
+                        updateUI(null);
+                    }
                 } else {
-                    Toast.makeText(LoginActivity.this, "Authentication failed.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(LoginActivity.this, "Registration failed.", Toast.LENGTH_SHORT).show();
                     updateUI(null);
                 }
             });

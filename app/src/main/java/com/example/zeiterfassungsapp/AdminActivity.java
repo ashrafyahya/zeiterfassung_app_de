@@ -59,14 +59,20 @@ public class AdminActivity extends AppCompatActivity {
                 roleHeader.setText("Role");
                 roleHeader.setPadding(8, 8, 8, 8);
                 roleHeader.setTypeface(null, android.graphics.Typeface.BOLD);
+                TextView idHeader = new TextView(AdminActivity.this);  // New Header for User ID
+                idHeader.setText("ID");
+                idHeader.setPadding(8, 8, 8, 8);
+                idHeader.setTypeface(null, android.graphics.Typeface.BOLD);
                 headerRow.addView(emailHeader);
                 headerRow.addView(roleHeader);
+                headerRow.addView(idHeader);  // Add User ID header to the row
                 adminTableLayout.addView(headerRow);
     
                 // Data rows
                 for (QueryDocumentSnapshot document : task.getResult()) {
                     String email = document.getString("email");
                     String role = document.getString("role");
+                    String id = document.getId();  // Get the User ID
     
                     TableRow row = new TableRow(AdminActivity.this);
                     TextView emailView = new TextView(AdminActivity.this);
@@ -75,9 +81,14 @@ public class AdminActivity extends AppCompatActivity {
                     TextView roleView = new TextView(AdminActivity.this);
                     roleView.setText(role != null ? role : "N/A");
                     roleView.setPadding(8, 8, 8, 8);
+                    TextView idView = new TextView(AdminActivity.this);  // New TextView for User ID
+                    idView.setText(id != null ? id : "N/A");
+                    idView.setPadding(8, 8, 8, 8);
+
     
                     row.addView(emailView);
                     row.addView(roleView);
+                    row.addView(idView);  // Add User ID TextView to the row
                     adminTableLayout.addView(row);
                 }
             } else {
@@ -144,10 +155,21 @@ public class AdminActivity extends AppCompatActivity {
         }
     
         db.collection("users").document(userId)
-                .update("role", newRole)
-                .addOnSuccessListener(aVoid -> {
-                    Toast.makeText(AdminActivity.this, "User role updated successfully", Toast.LENGTH_SHORT).show();
-                })
+        .get()
+        .addOnSuccessListener(documentSnapshot -> {
+            if (documentSnapshot.exists()) {
+                db.collection("users").document(userId)
+                    .update("role", newRole)
+                    .addOnSuccessListener(aVoid -> {
+                        Toast.makeText(AdminActivity.this, "User role updated successfully", Toast.LENGTH_SHORT).show();
+                    })
+                    .addOnFailureListener(e -> {
+                        Toast.makeText(AdminActivity.this, "Failed to update user role: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    });
+            } else {
+                Toast.makeText(this, "User ID does not exist", Toast.LENGTH_SHORT).show();
+            }
+        })
                 .addOnFailureListener(e -> {
                     Toast.makeText(AdminActivity.this, "Failed to update user role: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
