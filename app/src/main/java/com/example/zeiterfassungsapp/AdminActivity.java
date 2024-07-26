@@ -59,9 +59,13 @@ public class AdminActivity extends AppCompatActivity {
     @SuppressLint("SetTextI18n")
     private void toggleUserTimeEntries() {
         if (userTimesVisible) {
+            // Benutzerzeiten ausblenden
             adminTableLayout.removeAllViews();
             loadUserTimeEntriesButton.setText("Load User Time Entries");
             userTimesVisible = false;
+
+            // Benutzerliste wieder anzeigen
+            loadAllUsers();
         } else {
             String customUserId = customUserIdEditText.getText().toString().trim();
             if (TextUtils.isEmpty(customUserId)) {
