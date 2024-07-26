@@ -24,6 +24,21 @@
         </TableLayout>
     </ScrollView>
 
+    <!-- EditText for entering custom user ID -->
+<EditText
+android:id="@+id/customUserIdEditText"
+android:layout_width="match_parent"
+android:layout_height="wrap_content"
+android:hint="Enter Custom User ID" />
+
+<!-- Button to load/hide time entries of a specific user -->
+<Button
+android:id="@+id/loadUserTimeEntriesButton"
+android:layout_width="match_parent"
+android:layout_height="wrap_content"
+android:text="Load User Time Entries" />
+
+
     <!-- Role Management Section -->
     <TextView
         android:layout_width="match_parent"
