@@ -248,7 +248,7 @@ private fun formatDuration(durationMillis: Long): String {
 
     private fun isAdminUser(callback: (Boolean) -> Unit) {
         val user = mAuth.currentUser
-
+    
         user?.let {
             db.collection("users").document(it.uid)
                 .get()
@@ -271,6 +271,7 @@ private fun formatDuration(durationMillis: Long): String {
             callback(false)
         }
     }
+    
 
     private fun saveTimeEntry(userId: String, checkInTime: Long, checkOutTime: Long?) {
         val timeEntry = hashMapOf(

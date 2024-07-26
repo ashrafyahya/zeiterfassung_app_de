@@ -38,8 +38,8 @@
         android:id="@+id/userIdEditText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="User ID (e.g., 100001)"
-        android:inputType="number" />
+        android:hint="User ID"
+        android:inputType="text" />
 
     <EditText
         android:id="@+id/newRoleEditText"

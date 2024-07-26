@@ -1,6 +1,7 @@
 package com.example.zeiterfassungsapp;
 
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TableLayout;
@@ -149,30 +150,31 @@ public class AdminActivity extends AppCompatActivity {
         String userId = userIdEditText.getText().toString().trim();
         String newRole = newRoleEditText.getText().toString().trim();
     
-        if (userId.isEmpty() || newRole.isEmpty()) {
+        if (TextUtils.isEmpty(userId) || TextUtils.isEmpty(newRole)) {
             Toast.makeText(this, "Please fill in all fields", Toast.LENGTH_SHORT).show();
             return;
         }
     
         db.collection("users").document(userId)
-        .get()
-        .addOnSuccessListener(documentSnapshot -> {
-            if (documentSnapshot.exists()) {
-                db.collection("users").document(userId)
-                    .update("role", newRole)
-                    .addOnSuccessListener(aVoid -> {
-                        Toast.makeText(AdminActivity.this, "User role updated successfully", Toast.LENGTH_SHORT).show();
-                    })
-                    .addOnFailureListener(e -> {
-                        Toast.makeText(AdminActivity.this, "Failed to update user role: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                    });
-            } else {
-                Toast.makeText(this, "User ID does not exist", Toast.LENGTH_SHORT).show();
-            }
-        })
-                .addOnFailureListener(e -> {
-                    Toast.makeText(AdminActivity.this, "Failed to update user role: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                });
+            .get()
+            .addOnSuccessListener(documentSnapshot -> {
+                if (documentSnapshot.exists()) {
+                    db.collection("users").document(userId)
+                        .update("role", newRole)
+                        .addOnSuccessListener(aVoid -> {
+                            Toast.makeText(AdminActivity.this, "User role updated successfully", Toast.LENGTH_SHORT).show();
+                        })
+                        .addOnFailureListener(e -> {
+                            Toast.makeText(AdminActivity.this, "Failed to update user role: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                        });
+                } else {
+                    Toast.makeText(this, "User ID does not exist", Toast.LENGTH_SHORT).show();
+                }
+            })
+            .addOnFailureListener(e -> {
+                Toast.makeText(AdminActivity.this, "Failed to update user role: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            });
     }
+    
     
 }
