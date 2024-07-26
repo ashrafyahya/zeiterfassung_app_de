@@ -60,20 +60,20 @@ public class AdminActivity extends AppCompatActivity {
                 roleHeader.setText("Role");
                 roleHeader.setPadding(8, 8, 8, 8);
                 roleHeader.setTypeface(null, android.graphics.Typeface.BOLD);
-                TextView idHeader = new TextView(AdminActivity.this);  // New Header for User ID
-                idHeader.setText("ID");
+                TextView idHeader = new TextView(AdminActivity.this);
+                idHeader.setText("Custom ID");
                 idHeader.setPadding(8, 8, 8, 8);
                 idHeader.setTypeface(null, android.graphics.Typeface.BOLD);
                 headerRow.addView(emailHeader);
                 headerRow.addView(roleHeader);
-                headerRow.addView(idHeader);  // Add User ID header to the row
+                headerRow.addView(idHeader);
                 adminTableLayout.addView(headerRow);
     
                 // Data rows
                 for (QueryDocumentSnapshot document : task.getResult()) {
                     String email = document.getString("email");
                     String role = document.getString("role");
-                    String id = document.getId();  // Get the User ID
+                    String customUserId = document.getString("customUserId"); // Get custom ID
     
                     TableRow row = new TableRow(AdminActivity.this);
                     TextView emailView = new TextView(AdminActivity.this);
@@ -82,14 +82,15 @@ public class AdminActivity extends AppCompatActivity {
                     TextView roleView = new TextView(AdminActivity.this);
                     roleView.setText(role != null ? role : "N/A");
                     roleView.setPadding(8, 8, 8, 8);
-                    TextView idView = new TextView(AdminActivity.this);  // New TextView for User ID
-                    idView.setText(id != null ? id : "N/A");
+                    TextView idView = new TextView(AdminActivity.this);
+                    idView.setText(customUserId != null ? customUserId : "N/A"); // Display custom ID
                     idView.setPadding(8, 8, 8, 8);
-
+                    idView.setSingleLine(false);  // Enable multi-line wrapping
+                    idView.setEllipsize(null);  // Disable ellipsize
     
                     row.addView(emailView);
                     row.addView(roleView);
-                    row.addView(idView);  // Add User ID TextView to the row
+                    row.addView(idView);
                     adminTableLayout.addView(row);
                 }
             } else {
@@ -147,26 +148,29 @@ public class AdminActivity extends AppCompatActivity {
     }
 
     private void changeUserRole() {
-        String userId = userIdEditText.getText().toString().trim();
+        String customUserId = userIdEditText.getText().toString().trim();
         String newRole = newRoleEditText.getText().toString().trim();
-    
-        if (TextUtils.isEmpty(userId) || TextUtils.isEmpty(newRole)) {
+
+        if (TextUtils.isEmpty(customUserId) || TextUtils.isEmpty(newRole)) {
             Toast.makeText(this, "Please fill in all fields", Toast.LENGTH_SHORT).show();
             return;
         }
-    
-        db.collection("users").document(userId)
+
+        db.collection("users")
+            .whereEqualTo("customUserId", customUserId)
             .get()
-            .addOnSuccessListener(documentSnapshot -> {
-                if (documentSnapshot.exists()) {
-                    db.collection("users").document(userId)
-                        .update("role", newRole)
-                        .addOnSuccessListener(aVoid -> {
-                            Toast.makeText(AdminActivity.this, "User role updated successfully", Toast.LENGTH_SHORT).show();
-                        })
-                        .addOnFailureListener(e -> {
-                            Toast.makeText(AdminActivity.this, "Failed to update user role: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                        });
+            .addOnCompleteListener(task -> {
+                if (task.isSuccessful() && !task.getResult().isEmpty()) {
+                    for (QueryDocumentSnapshot document : task.getResult()) {
+                        db.collection("users").document(document.getId())
+                            .update("role", newRole)
+                            .addOnSuccessListener(aVoid -> {
+                                Toast.makeText(AdminActivity.this, "User role updated successfully", Toast.LENGTH_SHORT).show();
+                            })
+                            .addOnFailureListener(e -> {
+                                Toast.makeText(AdminActivity.this, "Failed to update user role: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                            });
+                    }
                 } else {
                     Toast.makeText(this, "User ID does not exist", Toast.LENGTH_SHORT).show();
                 }
@@ -175,6 +179,5 @@ public class AdminActivity extends AppCompatActivity {
                 Toast.makeText(AdminActivity.this, "Failed to update user role: " + e.getMessage(), Toast.LENGTH_SHORT).show();
             });
     }
-    
-    
-}
+    }
+
