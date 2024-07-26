@@ -182,7 +182,7 @@ public class AdminActivity extends AppCompatActivity {
                 roleHeader.setPadding(8, 8, 8, 8);
                 roleHeader.setTypeface(null, android.graphics.Typeface.BOLD);
                 TextView idHeader = new TextView(AdminActivity.this);
-                idHeader.setText("Custom ID");
+                idHeader.setText("User ID");
                 idHeader.setPadding(8, 8, 8, 8);
                 idHeader.setTypeface(null, android.graphics.Typeface.BOLD);
                 headerRow.addView(emailHeader);
@@ -194,7 +194,7 @@ public class AdminActivity extends AppCompatActivity {
                 for (QueryDocumentSnapshot document : task.getResult()) {
                     String email = document.getString("email");
                     String role = document.getString("role");
-                    String customUserId = document.getString("customUserId"); // Get custom ID
+                    String customUserId = document.getString("customUserId"); // Get User ID
 
                     TableRow row = new TableRow(AdminActivity.this);
                     TextView emailView = new TextView(AdminActivity.this);
@@ -204,7 +204,7 @@ public class AdminActivity extends AppCompatActivity {
                     roleView.setText(role != null ? role : "N/A");
                     roleView.setPadding(8, 8, 8, 8);
                     TextView idView = new TextView(AdminActivity.this);
-                    idView.setText(customUserId != null ? customUserId : "N/A"); // Display custom ID
+                    idView.setText(customUserId != null ? customUserId : "N/A"); // Display User ID
                     idView.setPadding(8, 8, 8, 8);
                     idView.setSingleLine(false); // Enable multi-line wrapping
                     idView.setEllipsize(null); // Disable ellipsize
