@@ -8,6 +8,9 @@ import android.widget.EditText;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
+import com.google.firebase.auth.FirebaseAuthUserCollisionException;
+import com.google.firebase.auth.FirebaseAuthWeakPasswordException;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.HashMap;
@@ -20,6 +23,8 @@ public class LoginActivity extends AppCompatActivity {
     private FirebaseFirestore db;
     private EditText emailEditText, passwordEditText;
     private Button loginButton, registerButton;
+    private static final String KEY_EMAIL = "email";
+    private static final String KEY_PASSWORD = "password";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,6 +40,14 @@ public class LoginActivity extends AppCompatActivity {
 
         loginButton.setOnClickListener(view -> loginUser());
         registerButton.setOnClickListener(view -> registerUser());
+
+        if (savedInstanceState != null) {
+            // Restore saved user input
+            String savedEmail = savedInstanceState.getString(KEY_EMAIL);
+            String savedPassword = savedInstanceState.getString(KEY_PASSWORD);
+            emailEditText.setText(savedEmail);
+            passwordEditText.setText(savedPassword);
+        }
     }
 
     private void loginUser() {
@@ -94,20 +107,29 @@ public class LoginActivity extends AppCompatActivity {
                     updateUI(null);
                 }
             } else {
-                Toast.makeText(LoginActivity.this, "Registration failed.", Toast.LENGTH_SHORT).show();
-                updateUI(null);
+                handleRegistrationError(task.getException());
             }
         });
 }
 
-    
+private void handleRegistrationError(Exception exception) {
+    if (exception instanceof FirebaseAuthWeakPasswordException) {
+        Toast.makeText(this, "Weak password. Password should be at least 6 characters long.", Toast.LENGTH_SHORT).show();
+    } else if (exception instanceof FirebaseAuthInvalidCredentialsException) {
+        Toast.makeText(this, "Invalid email format.", Toast.LENGTH_SHORT).show();
+    } else if (exception instanceof FirebaseAuthUserCollisionException) {
+        Toast.makeText(this, "User with this email already exists.", Toast.LENGTH_SHORT).show();
+    } else {
+        Toast.makeText(this, "Registration failed: " + exception.getMessage(), Toast.LENGTH_SHORT).show();
+    }
+}
+
     private String generateCustomUserId() {
         // Beispiel für die Generierung einer sechsstelligen numerischen ID
         Random random = new Random();
         int number = random.nextInt(900000) + 100000; // Zufällige Zahl zwischen 100000 und 999999
         return String.valueOf(number);
     }
-    
 
     private void saveUserToFirestore(FirebaseUser user) {
         String userId = user.getUid();
@@ -137,6 +159,14 @@ public class LoginActivity extends AppCompatActivity {
             .addOnFailureListener(e -> {
                 Toast.makeText(LoginActivity.this, "Failed to update role: " + e.getMessage(), Toast.LENGTH_SHORT).show();
             });
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        // Save user input
+        outState.putString(KEY_EMAIL, emailEditText.getText().toString());
+        outState.putString(KEY_PASSWORD, passwordEditText.getText().toString());
     }
 
     private void updateUI(FirebaseUser user) {
