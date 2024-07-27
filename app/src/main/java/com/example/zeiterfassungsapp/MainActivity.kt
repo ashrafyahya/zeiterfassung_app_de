@@ -138,6 +138,7 @@ class MainActivity : AppCompatActivity() {
         user?.let {
             try {
                 db.collection("timeEntries").whereEqualTo("userId", it.uid)
+                    .orderBy("checkIn", Query.Direction.DESCENDING)
                     .get()
                     .addOnCompleteListener { task ->
                         if (task.isSuccessful) {

@@ -270,7 +270,7 @@ public class AdminActivity extends AppCompatActivity {
         try {
             // Lade alle Benutzerdaten
             loadAllUsers();
-    
+
             // Zeige eine Toast-Nachricht an, wenn das Laden der Daten erfolgreich war
             Toast.makeText(this, "Daten erfolgreich geladen", Toast.LENGTH_SHORT).show();
         } catch (Exception e) {
@@ -278,8 +278,7 @@ public class AdminActivity extends AppCompatActivity {
             Toast.makeText(this, "Fehler beim Laden der Daten: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
-    
-    
+
     // formatTime(long timestamp): Formatiert einen Zeitstempel in Datum und
     // Uhrzeit.
     private String formatTime(long timestamp) {
