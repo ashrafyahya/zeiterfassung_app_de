@@ -3,6 +3,7 @@ package com.example.zeiterfassungsapp;
 import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TableLayout;
@@ -50,7 +51,26 @@ public class AdminActivity extends AppCompatActivity {
 
         customUserIdEditText = findViewById(R.id.customUserIdEditText);
         loadDataButton.setOnClickListener(view -> loadAllData());
-        changeRoleButton.setOnClickListener(view -> changeUserRole());
+        changeRoleButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String userId = userIdEditText.getText().toString().trim();
+                String newRole = newRoleEditText.getText().toString().trim();
+        
+                if (userId.isEmpty() || newRole.isEmpty()) {
+                    Toast.makeText(AdminActivity.this, "User ID and Role cannot be empty", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+        
+                if (!isValidRole(newRole)) {
+                    Toast.makeText(AdminActivity.this, "Invalid role. Please enter 'user' or 'admin'", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+        
+                changeUserRole(userId, newRole);
+            }
+        });
+        
 
         // Beispiel: Laden aller Benutzerdaten beim Start der Aktivität
         loadAllUsers();
@@ -274,9 +294,9 @@ public class AdminActivity extends AppCompatActivity {
         return sdf.format(date);
     }
 
-    private void changeUserRole() {
-        String customUserId = userIdEditText.getText().toString().trim();
-        String newRole = newRoleEditText.getText().toString().trim();
+    private void changeUserRole(String customUserId, String newRole  ) {
+        // String customUserId = userIdEditText.getText().toString().trim();
+        // String newRole = newRoleEditText.getText().toString().trim();
 
         if (TextUtils.isEmpty(customUserId) || TextUtils.isEmpty(newRole)) {
             Toast.makeText(this, "Please fill in all fields", Toast.LENGTH_SHORT).show();
@@ -310,4 +330,9 @@ public class AdminActivity extends AppCompatActivity {
                             Toast.LENGTH_SHORT).show();
                 });
     }
+    
+    private boolean isValidRole(String role) {
+        return role.equals("user") || role.equals("admin");
+    }
+    
 }
