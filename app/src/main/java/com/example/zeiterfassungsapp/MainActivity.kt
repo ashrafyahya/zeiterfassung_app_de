@@ -31,6 +31,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var tableLayout: TableLayout
     private var timesVisible = false
     private lateinit var adminButton: Button
+    private lateinit var totalDurationButton: Button
+    private lateinit var totalDurationTextView: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -50,6 +52,18 @@ class MainActivity : AppCompatActivity() {
         checkOutButton.setOnClickListener { checkOut() }
         viewTimesButton.setOnClickListener { viewTimes() }
         logoutButton.setOnClickListener { logout() }
+
+        totalDurationButton = findViewById(R.id.totalDurationButton)
+    totalDurationTextView = findViewById(R.id.totalDurationTextView)
+
+    totalDurationButton.setOnClickListener {
+        if (totalDurationTextView.visibility == View.GONE) {
+            calculateAndShowTotalDuration()
+        } else {
+            totalDurationTextView.visibility = View.GONE
+            totalDurationButton.text = "Show Total Duration"
+        }
+    }
 
         adminButton.setOnClickListener {
             isAdminUser { isAdmin ->
@@ -93,8 +107,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
     
-    
-
     private fun checkOut() {
         val user = mAuth.currentUser
         user?.let { currentUser ->
@@ -126,8 +138,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
     
-    
-
     private fun viewTimes() {
     if (timesVisible) {
         tableLayout.visibility = View.GONE
@@ -249,7 +259,6 @@ private fun formatDuration(durationMillis: Long): String {
 
     private fun isAdminUser(callback: (Boolean) -> Unit) {
         val user = mAuth.currentUser
-    
         user?.let {
             db.collection("users").document(it.uid)
                 .get()
@@ -293,6 +302,35 @@ private fun formatDuration(durationMillis: Long): String {
             Toast.makeText(this, "Check In failed: ${e.message}", Toast.LENGTH_SHORT).show()
         }
     }
+
+    private fun calculateAndShowTotalDuration() {
+        val user = mAuth.currentUser
+        user?.let {
+            db.collection("timeEntries")
+                .whereEqualTo("userId", it.uid)
+                .get()
+                .addOnSuccessListener { documents ->
+                    var totalDuration = 0L
+                    for (document in documents) {
+                        val checkInTime = document.getLong("checkIn")
+                        val checkOutTime = document.getLong("checkOut")
+                        if (checkInTime != null && checkOutTime != null) {
+                            totalDuration += (checkOutTime - checkInTime)
+                        }
+                    }
+                    totalDurationTextView.text = "Total Duration: ${formatDuration(totalDuration)}"
+                    totalDurationTextView.visibility = View.VISIBLE
+                    totalDurationButton.text = "Hide Total Duration"
+                }
+                .addOnFailureListener { exception ->
+                    Toast.makeText(this, "Failed to calculate total duration: ${exception.message}", Toast.LENGTH_SHORT).show()
+                }
+        } ?: run {
+            Toast.makeText(this, "User not signed in", Toast.LENGTH_SHORT).show()
+        }
+    }
+    
+    
 
     private fun getTimeEntriesForUser(userId: String) {
         db.collection("timeEntries")
