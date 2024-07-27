@@ -1,46 +1,55 @@
-<?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     android:padding="16dp">
 
     <Button
         android:id="@+id/checkInButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Check In" />
+        android:text="Check In"
+        android:layout_alignParentTop="true"
+        android:layout_marginBottom="8dp"/>
 
     <Button
         android:id="@+id/checkOutButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Check Out" />
+        android:text="Check Out"
+        android:layout_below="@id/checkInButton"
+        android:layout_marginBottom="8dp"/>
 
     <Button
         android:id="@+id/adminButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Admin Panel" />
+        android:text="Admin Panel"
+        android:layout_below="@id/checkOutButton"
+        android:layout_marginBottom="8dp"/>
 
     <TextView
         android:id="@+id/statusTextView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingTop="16dp" />
+        android:paddingTop="16dp"
+        android:layout_below="@id/adminButton"
+        android:layout_marginBottom="8dp"/>
 
     <Button
         android:id="@+id/viewTimesButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="View Times" />
-        
+        android:text="View Times"
+        android:layout_below="@id/statusTextView"
+        android:layout_marginBottom="8dp"/>
+
     <Button
-    android:id="@+id/totalDurationButton"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:text="Show Total Duration"
-    android:layout_marginBottom="8dp" />
+        android:id="@+id/totalDurationButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Show Total Duration"
+        android:layout_below="@id/viewTimesButton"
+        android:layout_marginBottom="8dp"/>
 
     <TextView
         android:id="@+id/totalDurationTextView"
@@ -48,27 +57,33 @@
         android:layout_height="wrap_content"
         android:text="Total Duration: "
         android:visibility="gone"
-        android:layout_marginBottom="8dp" />
+        android:layout_below="@id/totalDurationButton"
+        android:layout_marginBottom="8dp"/>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fillViewport="true"
+        android:layout_below="@id/totalDurationTextView"
+        android:layout_above="@id/logoutButton">
+        
+        <TableLayout
+            android:id="@+id/tableLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:stretchColumns="0,1,2"
+            android:shrinkColumns="0,1,2"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"/>
+    </ScrollView>
 
     <Button
         android:id="@+id/logoutButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Logout" />
+        android:text="Logout"
+        android:layout_alignParentBottom="true"
+        android:padding="16dp"
+        android:textSize="18sp"/>
 
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:fillViewport="true">
-        <TableLayout
-    		android:id="@+id/tableLayout"
-    		android:layout_width="match_parent"
-    		android:layout_height="wrap_content"
-    		android:stretchColumns="0,1,2"
-    		android:shrinkColumns="0,1,2"
-    		android:layout_marginTop="10dp"
-   		android:layout_marginBottom="10dp">
-</TableLayout>
-
-    </ScrollView>
-</LinearLayout>
+</RelativeLayout>
