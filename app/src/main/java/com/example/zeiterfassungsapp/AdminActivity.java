@@ -272,10 +272,10 @@ public class AdminActivity extends AppCompatActivity {
             loadAllUsers();
 
             // Zeige eine Toast-Nachricht an, wenn das Laden der Daten erfolgreich war
-            Toast.makeText(this, "Daten erfolgreich geladen", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Data loaded successfully", Toast.LENGTH_SHORT).show();
         } catch (Exception e) {
             // Fehlerbehandlung, wenn das Abrufen der Daten fehlgeschlagen ist
-            Toast.makeText(this, "Fehler beim Laden der Daten: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Error when loading data: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
 

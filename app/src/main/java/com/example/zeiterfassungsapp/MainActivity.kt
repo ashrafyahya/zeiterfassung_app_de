@@ -1,10 +1,12 @@
 package com.example.zeiterfassungsapp
-import android.graphics.Color
 
-import android.graphics.Typeface
 import java.text.SimpleDateFormat
 import java.util.Locale
 import java.util.Date
+
+import android.graphics.Color
+
+import android.graphics.Typeface
 import android.widget.TableLayout
 import android.widget.TableRow
 import android.os.Bundle
@@ -16,8 +18,12 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import android.content.Intent
 import android.widget.Toast
+import androidx.annotation.NonNull
+import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.firestore.FirebaseFirestoreException
 import com.google.firebase.firestore.Query
+import com.google.firebase.messaging.FirebaseMessaging
+import com.google.android.gms.tasks.Task
 
 class MainActivity : AppCompatActivity() {
 
@@ -52,6 +58,15 @@ class MainActivity : AppCompatActivity() {
         checkOutButton.setOnClickListener { checkOut() }
         viewTimesButton.setOnClickListener { viewTimes() }
         logoutButton.setOnClickListener { logout() }
+
+        FirebaseMessaging.getInstance().subscribeToTopic("news")
+            .addOnCompleteListener { task ->
+                var msg = "Done"
+                if (!task.isSuccessful) {
+                    msg = "Failed"
+                }
+                // Toast.makeText(this@MainActivity, msg, Toast.LENGTH_SHORT).show()
+            }
 
         totalDurationButton = findViewById(R.id.totalDurationButton)
     totalDurationTextView = findViewById(R.id.totalDurationTextView)

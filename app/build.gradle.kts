@@ -57,6 +57,7 @@ dependencies {
     // Add Firebase SDK dependencies
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-firestore")
+    implementation ("androidx.vectordrawable:vectordrawable:1.1.0")
 
     // AndroidX and other dependencies
     implementation(libs.androidx.core.ktx)
@@ -68,6 +69,7 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(libs.androidx.appcompat)
+    implementation(libs.firebase.messaging)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
