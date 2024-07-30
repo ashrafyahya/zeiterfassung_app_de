@@ -1,4 +1,5 @@
 package com.example.zeiterfassungsapp;
+
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -7,8 +8,10 @@ import android.content.Intent;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
+import android.util.Log;
 
 import androidx.core.app.NotificationCompat;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
@@ -17,22 +20,41 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
     private static final String TAG = "MyFirebaseMsgService";
 
-    
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
-        // TODO(developer): Handle FCM messages here.
-     
-		if (remoteMessage.getNotification()!=null){
-		// Show the notification
-		String notificationBody = remoteMessage.getNotification().getBody();
-		String notificationTitle = remoteMessage.getNotification().getTitle();
+        // Handle both notification and data messages
+        if (remoteMessage.getNotification() != null) {
+            // Handle notification message
+            String notificationBody = remoteMessage.getNotification().getBody();
+            String notificationTitle = remoteMessage.getNotification().getTitle();
 
-		sendNotification (notificationTitle, notificationBody);
+            Log.d(TAG, "Notification Title: " + notificationTitle);
+            Log.d(TAG, "Notification Body: " + notificationBody);
 
-			}
-   	 	}	
-   
-    
+            // Zeige die Benachrichtigung in der App
+            Intent intent = new Intent("MyFirebaseMessage");
+            intent.putExtra("title", notificationTitle);
+            intent.putExtra("body", notificationBody);
+            LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+
+            // Zeige die Systembenachrichtigung
+            sendNotification(notificationTitle, notificationBody);
+        }
+
+        if (remoteMessage.getData().size() > 0) {
+            // Handle data message
+            Log.d(TAG, "Message data payload: " + remoteMessage.getData());
+
+            // Extract data from the message
+            String messageData = remoteMessage.getData().get("message");
+
+            // Zeige die Nachricht in der App
+            Intent intent = new Intent("MyFirebaseMessage");
+            intent.putExtra("data", messageData);
+            LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+        }
+    }
+
     private void sendNotification(String title, String body) {
         Intent intent = new Intent(this, MainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -43,7 +65,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         NotificationCompat.Builder notificationBuilder =
                 new NotificationCompat.Builder(this, channelId)
-                        .setSmallIcon(R.mipmap.ic_launcher )
+                        .setSmallIcon(R.mipmap.ic_launcher)
                         .setContentTitle(title)
                         .setContentText(body)
                         .setAutoCancel(true)
@@ -63,6 +85,4 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
         notificationManager.notify(0 /* ID of notification */, notificationBuilder.build());
     }
-
- 
 }

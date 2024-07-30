@@ -58,6 +58,11 @@ dependencies {
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-firestore")
     implementation ("androidx.vectordrawable:vectordrawable:1.1.0")
+    implementation ("androidx.localbroadcastmanager:localbroadcastmanager:1.0.0")
+
+    // Add Kotlin standard library dependency
+    //implementation ("org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version")
+    //implementation(libs.kotlin.stdlib)
 
     // AndroidX and other dependencies
     implementation(libs.androidx.core.ktx)
