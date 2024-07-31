@@ -6,7 +6,7 @@ Die Zeiterfassungs-App ist eine Android-Anwendung, die Benutzern die Möglichkei
 
 ## Technologien
 
-- **Programmiersprachen**: Java, Kotlin
+- **Programmiersprachen**: Java
 - **Entwicklungsumgebung**: Android Studio
 - **Backend**: Firebase
   - **Firebase Authentication**: Benutzerverwaltung und Authentifizierung
