@@ -1,0 +1,2 @@
+Integration von Firebase mit der App 
+QR-Code für App Installation erstellen  
