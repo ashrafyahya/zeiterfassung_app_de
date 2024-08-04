@@ -11,6 +11,7 @@ Die Zeiterfassungs-App ist eine Android-Anwendung, die Benutzern die Möglichkei
 - **Backend**: Firebase
   - **Firebase Authentication**: Benutzerverwaltung und Authentifizierung
   - **Firebase Firestore**: Speicherung und Abruf von Zeitaufzeichnungen
+  - **Firebase FCM**: Firebase Cloud Messaging (FCM) Integration  
 - **Datenbank**: Cloud Firestore
 - **Layout**: XML für Android UI
 - **Bibliotheken**: Firebase SDK
