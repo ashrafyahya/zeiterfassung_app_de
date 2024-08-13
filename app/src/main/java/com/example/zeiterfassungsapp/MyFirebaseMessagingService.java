@@ -16,15 +16,25 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
+/**
+ * Dienst zum Verarbeiten eingehender Firebase-Messaging-Nachrichten.
+ */
 public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
+    // Tag für das Logging
     private static final String TAG = "MyFirebaseMsgService";
 
+    /**
+     * Diese Methode wird aufgerufen, wenn eine Nachricht empfangen wird.
+     * @param remoteMessage Die empfangene Nachricht.
+     */
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
-        // Handle both notification and data messages
+        // Behandlung von Benachrichtigungs- und Daten-Nachrichten
+
+        // Überprüft, ob die Nachricht eine Benachrichtigung enthält
         if (remoteMessage.getNotification() != null) {
-            // Handle notification message
+            // Verarbeiten der Benachrichtigungsnachricht
             String notificationBody = remoteMessage.getNotification().getBody();
             String notificationTitle = remoteMessage.getNotification().getTitle();
 
@@ -41,11 +51,12 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             sendNotification(notificationTitle, notificationBody);
         }
 
+        // Überprüft, ob die Nachricht Daten enthält
         if (remoteMessage.getData().size() > 0) {
-            // Handle data message
+            // Verarbeiten der Daten-Nachricht
             Log.d(TAG, "Message data payload: " + remoteMessage.getData());
 
-            // Extract data from the message
+            // Extrahiert Daten aus der Nachricht
             String messageData = remoteMessage.getData().get("message");
 
             // Zeige die Nachricht in der App
@@ -55,14 +66,22 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         }
     }
 
+    /**
+     * Zeigt eine Systembenachrichtigung mit dem gegebenen Titel und Text an.
+     * @param title Der Titel der Benachrichtigung.
+     * @param body Der Text der Benachrichtigung.
+     */
     private void sendNotification(String title, String body) {
         Intent intent = new Intent(this, MainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0 /* Request code */, intent,
                 PendingIntent.FLAG_IMMUTABLE);
 
+        // Kanal-ID für Benachrichtigungen
         String channelId = "fcm_default_channel";
         Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+
+        // Erstellen des Benachrichtigungs-Builder
         NotificationCompat.Builder notificationBuilder =
                 new NotificationCompat.Builder(this, channelId)
                         .setSmallIcon(R.mipmap.ic_launcher)
@@ -75,7 +94,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         NotificationManager notificationManager =
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
-        // Since android Oreo notification channel is needed.
+        // Erstellen des Benachrichtigungskanals für Android Oreo und höher
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel channel = new NotificationChannel(channelId,
                     "Channel human readable title",
@@ -83,6 +102,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             notificationManager.createNotificationChannel(channel);
         }
 
-        notificationManager.notify(0 /* ID of notification */, notificationBuilder.build());
+        // Senden der Benachrichtigung
+        notificationManager.notify(0 /* ID der Benachrichtigung */, notificationBuilder.build());
     }
 }
