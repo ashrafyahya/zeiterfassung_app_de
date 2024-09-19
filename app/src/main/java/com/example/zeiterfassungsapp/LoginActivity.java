@@ -55,9 +55,7 @@ public class LoginActivity extends AppCompatActivity {
         String password = passwordEditText.getText().toString().trim(); // Eingegebenes Passwort abrufen
 
         if (TextUtils.isEmpty(email) || TextUtils.isEmpty(password)) {
-            Toast.makeText(LoginActivity.this, "Please fill in all fields", Toast.LENGTH_SHORT).show(); // Fehlermeldung
-                                                                                                        // bei fehlenden
-                                                                                                        // Eingaben
+            Toast.makeText(LoginActivity.this, "Please fill in all fields", Toast.LENGTH_SHORT).show(); // Fehlermeldung bei fehlenden Eingaben
             return;
         }
 
@@ -67,10 +65,7 @@ public class LoginActivity extends AppCompatActivity {
                         FirebaseUser user = mAuth.getCurrentUser(); // Aktuellen Benutzer abrufen
                         updateUI(user); // UI mit Benutzerinformationen aktualisieren
                     } else {
-                        Toast.makeText(LoginActivity.this, "Authentication failed.", Toast.LENGTH_SHORT).show(); // Fehlermeldung
-                                                                                                                 // bei
-                                                                                                                 // fehlgeschlagener
-                                                                                                                 // Authentifizierung
+                        Toast.makeText(LoginActivity.this, "Authentication failed.", Toast.LENGTH_SHORT).show(); // Fehlermeldung bei fehlgeschlagener Authentifizierung
                         updateUI(null); // UI aktualisieren, wenn Benutzer null ist
                     }
                 });
@@ -81,9 +76,7 @@ public class LoginActivity extends AppCompatActivity {
         String password = passwordEditText.getText().toString().trim(); // Eingegebenes Passwort abrufen
 
         if (TextUtils.isEmpty(email) || TextUtils.isEmpty(password)) {
-            Toast.makeText(LoginActivity.this, "Please fill in all fields", Toast.LENGTH_SHORT).show(); // Fehlermeldung
-                                                                                                        // bei fehlenden
-                                                                                                        // Eingaben
+            Toast.makeText(LoginActivity.this, "Please fill in all fields", Toast.LENGTH_SHORT).show(); // Fehlermeldung bei fehlenden Eingaben
             return;
         }
 
@@ -113,10 +106,7 @@ public class LoginActivity extends AppCompatActivity {
                                         updateUI(null); // UI aktualisieren, wenn Benutzer null ist
                                     });
                         } else {
-                            Toast.makeText(LoginActivity.this, "User is null.", Toast.LENGTH_SHORT).show(); // Fehlermeldung,
-                                                                                                            // wenn
-                                                                                                            // Benutzer
-                                                                                                            // null ist
+                            Toast.makeText(LoginActivity.this, "User is null.", Toast.LENGTH_SHORT).show(); // Fehlermeldung, wenn Benutzer null ist
                             updateUI(null); // UI aktualisieren, wenn Benutzer null ist
                         }
                     } else {
@@ -133,12 +123,9 @@ public class LoginActivity extends AppCompatActivity {
             Toast.makeText(this, "Invalid email format.", Toast.LENGTH_SHORT).show(); // Fehlermeldung bei ungültigem
                                                                                       // E-Mail-Format
         } else if (exception instanceof FirebaseAuthUserCollisionException) {
-            Toast.makeText(this, "User with this email already exists.", Toast.LENGTH_SHORT).show(); // Fehlermeldung
-                                                                                                     // bei bestehendem
-                                                                                                     // Benutzer
+            Toast.makeText(this, "User with this email already exists.", Toast.LENGTH_SHORT).show(); // Fehlermeldung bei bestehendem Benutzer
         } else {
-            Toast.makeText(this, "Registration failed: " + exception.getMessage(), Toast.LENGTH_SHORT).show(); // Allgemeine
-                                                                                                               // Fehlermeldung
+            Toast.makeText(this, "Registration failed: " + exception.getMessage(), Toast.LENGTH_SHORT).show(); // Allgemeine Fehlermeldung
         }
     }
 
@@ -160,10 +147,7 @@ public class LoginActivity extends AppCompatActivity {
 
         db.collection("users").document(userId).set(userDoc)
                 .addOnSuccessListener(aVoid -> {
-                    Toast.makeText(LoginActivity.this, "User registered successfully", Toast.LENGTH_SHORT).show(); // Erfolgsnachricht
-                                                                                                                   // bei
-                                                                                                                   // erfolgreicher
-                                                                                                                   // Registrierung
+                    Toast.makeText(LoginActivity.this, "User registered successfully", Toast.LENGTH_SHORT).show(); // Erfolgsnachricht bei erfolgreicher Registrierung
                     updateUI(user); // UI mit Benutzerinformationen aktualisieren
                 })
                 .addOnFailureListener(e -> {
@@ -176,10 +160,7 @@ public class LoginActivity extends AppCompatActivity {
         db.collection("users").document(userId)
                 .update("role", newRole)
                 .addOnSuccessListener(aVoid -> {
-                    Toast.makeText(LoginActivity.this, "Role updated successfully", Toast.LENGTH_SHORT).show(); // Erfolgsnachricht
-                                                                                                                // bei
-                                                                                                                // erfolgreicher
-                                                                                                                // Rollenaktualisierung
+                    Toast.makeText(LoginActivity.this, "Role updated successfully", Toast.LENGTH_SHORT).show(); // Erfolgsnachricht bei erfolgreicher Rollenaktualisierung
                 })
                 .addOnFailureListener(e -> {
                     Toast.makeText(LoginActivity.this, "Failed to update role: " + e.getMessage(), Toast.LENGTH_SHORT)

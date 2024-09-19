@@ -283,7 +283,7 @@ public class AdminActivity extends AppCompatActivity {
     // Uhrzeit.
     private String formatTime(long timestamp) {
         db.collection("timeEntries")
-                .orderBy("checkIn", Query.Direction.DESCENDING); // Sort by checkIn time in descending order
+                .orderBy("checkIn", Query.Direction.DESCENDING); 
         // Formatierung des Zeitstempels in Datum und Uhrzeit
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault());
         Date date = new Date(timestamp);

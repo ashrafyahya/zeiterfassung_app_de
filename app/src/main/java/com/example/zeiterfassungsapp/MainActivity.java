@@ -34,13 +34,13 @@ import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
 
-    // Firebase Authentication instance
+    // Firebase-Authentifizierungsinstanz
     private FirebaseAuth mAuth;
 
-    // Firestore database instance
+    // Firestore-Datenbankinstanz
     private FirebaseFirestore db;
 
-    // UI components
+    // UI-Komponenten
     private Button checkInButton;
     private Button checkOutButton;
     private Button viewTimesButton;
@@ -52,17 +52,17 @@ public class MainActivity extends AppCompatActivity {
     private Button totalDurationButton;
     private TextView totalDurationTextView;
 
-    // BroadcastReceiver to handle messages
+    // BroadcastReceiver zur Nachrichtenverarbeitung
     private final BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            // Extract data from the Intent
+            // Extrahieren der Daten von Intent
             String title = intent.getStringExtra("title");
             String body = intent.getStringExtra("body");
 
             Log.d("BroadcastReceiver", "Received message: " + title + " - " + body);
 
-            // Show an in-app notification with the message content
+            // Anzeigen vom Inhalt von message in-app notification
             showInAppNotification(title, body);
         }
     };
@@ -73,11 +73,11 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // Initialize Firebase Authentication and Firestore
+        // Initialisierung von Firebase Authentication und Firestore
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
 
-        // Find views by ID
+        // Finden von views durch ID
         checkInButton = findViewById(R.id.checkInButton);
         checkOutButton = findViewById(R.id.checkOutButton);
         viewTimesButton = findViewById(R.id.viewTimesButton);
@@ -88,17 +88,17 @@ public class MainActivity extends AppCompatActivity {
         totalDurationButton = findViewById(R.id.totalDurationButton);
         totalDurationTextView = findViewById(R.id.totalDurationTextView);
 
-        // Set onClick listeners for the buttons
+        // Setzung von onClick listeners für die Buttons
         checkInButton.setOnClickListener(v -> checkIn());
         checkOutButton.setOnClickListener(v -> checkOut());
         viewTimesButton.setOnClickListener(v -> viewTimes());
         logoutButton.setOnClickListener(v -> logout());
 
-        // Register the BroadcastReceiver to receive messages
+        // Registrierung des BroadcastReceivers für den Epmfang von messages
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver,
                 new IntentFilter("MyFirebaseMessage"));
 
-        // Set onClick listener for total duration button
+        // Setzung von onClick listener für Total-Duration-Button
         totalDurationButton.setOnClickListener(v -> {
             if (totalDurationTextView.getVisibility() == View.GONE) {
                 calculateAndShowTotalDuration();
@@ -108,7 +108,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // Set onClick listener for admin button
+        // Setzung onClick listener für Admin-Button
         adminButton.setOnClickListener(v -> isAdminUser(isAdmin -> {
             if (isAdmin) {
                 Intent intent = new Intent(MainActivity.this, AdminActivity.class);
@@ -122,10 +122,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void checkIn() {
-        // Check if a user is signed in
+        // Überprüfung, ob ein Benutzer angemeldet ist
         if (mAuth.getCurrentUser() != null) {
             String userId = mAuth.getCurrentUser().getUid();
-            // Query Firestore to check if the user is already checked in
+            // Abfrage von Firestore, um zu prüfen, ob der Benutzer bereits eingecheckt ist
             db.collection("timeEntries")
                     .whereEqualTo("userId", userId)
                     .whereEqualTo("checkOut", null)
@@ -155,10 +155,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void checkOut() {
-        // Check if a user is signed in
+        // Überprüfung, ob ein Benutzer angemeldet ist
         if (mAuth.getCurrentUser() != null) {
             String userId = mAuth.getCurrentUser().getUid();
-            // Query Firestore to check if the user is currently checked in
+            // Abfrage von Firestore, um zu prüfen, ob der Benutzer aktuell eingecheckt ist
             db.collection("timeEntries")
                     .whereEqualTo("userId", userId)
                     .whereEqualTo("checkOut", null)
@@ -192,10 +192,10 @@ public class MainActivity extends AppCompatActivity {
             viewTimesButton.setText("View Times");
             timesVisible = false;
         } else {
-            // Check if a user is signed in
+            // Überprüfung, ob ein Benutzer angemeldet ist
             if (mAuth.getCurrentUser() != null) {
                 String userId = mAuth.getCurrentUser().getUid();
-                // Query Firestore to retrieve the user's time entries
+                // Abfrage von Firestore zum Abrufen der Zeiteinträge des Benutzers
                 db.collection("timeEntries")
                         .whereEqualTo("userId", userId)
                         .orderBy("checkIn", Query.Direction.DESCENDING)
@@ -204,7 +204,7 @@ public class MainActivity extends AppCompatActivity {
                             if (task.isSuccessful()) {
                                 tableLayout.removeAllViews();
 
-                                // Create and add the header row to the table layout
+                                // Erstellen und Hinzufügen der Kopfzeile zum Tabellenlayout
                                 TableRow headerRow = new TableRow(MainActivity.this);
                                 headerRow.setBackgroundColor(Color.parseColor("#CCCCCC"));
                                 headerRow.setPadding(16, 16, 16, 16);
@@ -235,7 +235,7 @@ public class MainActivity extends AppCompatActivity {
                                 headerRow.addView(durationHeader);
                                 tableLayout.addView(headerRow);
 
-                                // Add each time entry to the table layout
+                                // Hinzufügung jedes Zeiteintrags zum Tabellenlayout
                                 for (QueryDocumentSnapshot document : task.getResult()) {
                                     Long checkInTime = document.getLong("checkIn");
                                     Long checkOutTime = document.getLong("checkOut");
@@ -280,20 +280,20 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void logout() {
-        // Sign out the current user and navigate back to the login screen
+        // Abmelden des aktuellen Benutzers und zurück navigieren zum Anmeldebildschirm
         mAuth.signOut();
         startActivity(new Intent(MainActivity.this, LoginActivity.class));
         finish();
     }
 
     private void saveTimeEntry(String userId, Long checkIn, Long checkOut) {
-        // Create a map to hold time entry data
+        // Erstellen eine Karte zum Speichern von Zeiteintragsdaten
         HashMap<String, Object> timeEntry = new HashMap<>();
         timeEntry.put("userId", userId);
         timeEntry.put("checkIn", checkIn);
         timeEntry.put("checkOut", checkOut);
 
-        // Add the new time entry to the Firestore database
+        // Hinzufügen vom neuen Zeiteintrag zur Firestore-Datenbank 
         db.collection("timeEntries")
                 .add(timeEntry)
                 .addOnSuccessListener(documentReference -> {
@@ -306,10 +306,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void updateStatusText() {
-        // Check if a user is signed in
+        // Überprüfung, ob ein Benutzer angemeldet ist
         if (mAuth.getCurrentUser() != null) {
             String userId = mAuth.getCurrentUser().getUid();
-            // Query Firestore to check the user's current check-in status
+            // Abfrage von Firestore, um den aktuellen Check-in-Status des Benutzers zu überprüfen
             db.collection("timeEntries")
                     .whereEqualTo("userId", userId)
                     .whereEqualTo("checkOut", null)
@@ -330,13 +330,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private String formatTime(long timestamp) {
-        // Format the timestamp into a human-readable date and time string
+        // Formatierung dvomen Zeitstempel in eine für Menschen lesbare Datums- und Zeitzeichenfolge.
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
         return sdf.format(new Date(timestamp));
     }
 
     private String formatDuration(long durationMillis) {
-        // Convert the duration from milliseconds to hours and minutes
+        // Konvertierung die Dauer von Millisekunden in Stunden und Minuten
         long minutes = (durationMillis / 1000) / 60;
         long hours = minutes / 60;
         minutes = minutes % 60;
@@ -344,7 +344,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void showInAppNotification(String title, String body) {
-        // Create and display an in-app notification using an AlertDialog
+        // Erstellung und Anzeigen einer In-App-Benachrichtigung mithilfe eines AlertDialogs
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(title);
         builder.setMessage(body);
@@ -354,10 +354,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void calculateAndShowTotalDuration() {
-        // Check if a user is signed in
+        // Überprüfung, ob ein Benutzer angemeldet ist
         if (mAuth.getCurrentUser() != null) {
             String userId = mAuth.getCurrentUser().getUid();
-            // Query Firestore to retrieve all of the user's time entries
+            // Abfrage von Firestore zum Abrufen aller Zeiteinträge des Benutzers
             db.collection("timeEntries")
                     .whereEqualTo("userId", userId)
                     .get()
@@ -385,10 +385,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void isAdminUser(AdminCheckCallback callback) {
-        // Check if a user is signed in
+        // Überprüfung, ob ein Benutzer angemeldet ist
         if (mAuth.getCurrentUser() != null) {
             String userId = mAuth.getCurrentUser().getUid();
-            // Query Firestore to determine if the user is an admin
+            // Firestore abfragen, um festzustellen, ob der Benutzer ein Administrator ist
             db.collection("admins")
                     .document(userId)
                     .get()
@@ -404,7 +404,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    // Interface for admin check callback
+    // Schnittstelle für Admin-Check-Callback
     interface AdminCheckCallback {
         void onCheck(boolean isAdmin);
     }
