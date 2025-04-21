@@ -1,4 +1,4 @@
-# Zeiterfassungs-App
+# Zeiterfassung-App
 
 ## Überblick
 
